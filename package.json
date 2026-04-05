@@ -2,6 +2,7 @@
   "name": "hugh-gallery",
   "private": true,
   "scripts": {
+    "postinstall": "node scripts/sync-public.cjs",
     "sync:public": "node scripts/sync-public.cjs",
     "dev": "npm run sync:public && wrangler dev",
     "deploy": "npm run sync:public && wrangler deploy",
