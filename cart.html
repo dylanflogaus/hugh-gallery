@@ -410,9 +410,65 @@
       renderCart();
     }
 
-    function checkout() {
-      showToast('Checkout coming soon — email hugh to complete your purchase!');
+    async function checkout() {
+      const cart = getCart();
+      if (!cart.length) return;
+
+      const btn = document.querySelector('.checkout-btn');
+      const label = btn ? btn.textContent : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Redirecting to secure checkout…';
+      }
+
+      try {
+        const res = await fetch('/api/checkout-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            items: cart.map((line) => ({
+              id: line.id,
+              qty: Math.min(99, Math.max(1, parseInt(line.qty, 10) || 1)),
+            })),
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          showToast(data.error || 'Checkout could not start. Try again.');
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = label;
+          }
+          return;
+        }
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        }
+        showToast('Checkout is temporarily unavailable.');
+      } catch (_) {
+        showToast('Network error. Check your connection and try again.');
+      }
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = label;
+      }
     }
+
+    (function applyCheckoutReturn() {
+      const p = new URLSearchParams(window.location.search);
+      const st = p.get('checkout');
+      if (!st) return;
+      const path = window.location.pathname.split('/').pop() || 'cart.html';
+      if (st === 'success') {
+        saveCart([]);
+        updateCartCount();
+        showToast('Thank you! Your payment was received.');
+      } else if (st === 'cancel') {
+        showToast('Checkout cancelled — your cart is unchanged.');
+      }
+      history.replaceState({}, '', path);
+    })();
 
     renderCart();
   </script>

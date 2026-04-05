@@ -5,6 +5,7 @@
 (function () {
   const STORAGE_KEY = 'hugh_gallery_items';
   const API_GALLERY = '/api/gallery';
+  const API_TIMEOUT_MS = 2500;
 
   function formatMoney(n) {
     const num = Number(n);
@@ -269,23 +270,30 @@
    * Falls back to load() if the API is missing or returns an error.
    */
   async function loadAsync() {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
     try {
       const r = await fetch(API_GALLERY, {
         headers: { Accept: 'application/json' },
         cache: 'no-store',
+        signal: controller.signal,
       });
       if (r.ok) {
         const data = await r.json();
-        if (Array.isArray(data)) {
+        // Never replace the catalog with an empty list; fall back to cache/defaults.
+        if (Array.isArray(data) && data.length > 0) {
           const normalized = data.map(normalizeItem);
           localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
           return normalized;
         }
       }
+      return load();
     } catch (e) {
       console.warn('HughGallery.loadAsync: API unavailable, using cache/defaults.', e);
+      return load();
+    } finally {
+      clearTimeout(timer);
     }
-    return load();
   }
 
   function save(items) {

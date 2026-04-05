@@ -165,6 +165,192 @@ async function handleAdminVerify(request, env) {
   return Response.json({ ok: true });
 }
 
+/** Stripe application/x-www-form-urlencoded body (nested objects + arrays). */
+function objectToStripeForm(root) {
+  const sp = new URLSearchParams();
+  function walk(value, keyPath) {
+    if (value === null || value === undefined) return;
+    if (Array.isArray(value)) {
+      value.forEach((item, i) => {
+        walk(item, `${keyPath}[${i}]`);
+      });
+      return;
+    }
+    if (typeof value === 'object') {
+      for (const [k, v] of Object.entries(value)) {
+        walk(v, `${keyPath}[${k}]`);
+      }
+      return;
+    }
+    sp.append(keyPath, String(value));
+  }
+  for (const [k, v] of Object.entries(root)) {
+    walk(v, k);
+  }
+  return sp;
+}
+
+const FREE_SHIPPING_THRESHOLD_USD = 500;
+const SHIPPING_USD = 25;
+
+async function handleCheckoutSession(request, env) {
+  if (request.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+
+  if (!env.STRIPE_SECRET_KEY || typeof env.STRIPE_SECRET_KEY !== 'string') {
+    return Response.json(
+      { error: 'Payments are not configured on this server.' },
+      { status: 503 }
+    );
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: 'Invalid JSON body.' }, { status: 400 });
+  }
+
+  const rawItems = body.items;
+  if (!Array.isArray(rawItems) || rawItems.length === 0) {
+    return Response.json({ error: 'Cart is empty.' }, { status: 400 });
+  }
+
+  let rows;
+  try {
+    const q = await env.DB.prepare(
+      'SELECT id, price, cart_title, title, sold FROM gallery_items'
+    ).all();
+    rows = q.results || [];
+  } catch (e) {
+    console.error('POST /api/checkout-session DB', e);
+    return Response.json({ error: 'Could not load catalog.' }, { status: 500 });
+  }
+
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  const line_items = [];
+
+  for (const raw of rawItems) {
+    const id = String(raw.id || '').trim();
+    const qty = Math.min(99, Math.max(1, parseInt(raw.qty, 10) || 0));
+    if (!id || qty < 1) {
+      return Response.json({ error: 'Invalid cart line.' }, { status: 400 });
+    }
+
+    const row = byId.get(id);
+    if (!row) {
+      return Response.json(
+        {
+          error:
+            'An item in your cart is no longer available. Refresh the gallery and try again.',
+        },
+        { status: 400 }
+      );
+    }
+    if (row.sold) {
+      return Response.json(
+        {
+          error:
+            'A sold piece is still in your cart. Remove it to continue checkout.',
+        },
+        { status: 400 }
+      );
+    }
+
+    const priceUsd = Number(row.price) || 0;
+    if (priceUsd <= 0) {
+      return Response.json(
+        { error: 'An item could not be priced. Please contact the gallery.' },
+        { status: 400 }
+      );
+    }
+
+    const name = String(row.cart_title || row.title || 'Artwork').slice(
+      0,
+      500
+    );
+    const unitCents = Math.round(priceUsd * 100);
+    line_items.push({
+      quantity: qty,
+      price_data: {
+        currency: 'usd',
+        unit_amount: unitCents,
+        product_data: {
+          name,
+          metadata: { piece_id: id },
+        },
+      },
+    });
+  }
+
+  if (line_items.length === 0) {
+    return Response.json({ error: 'Cart is empty.' }, { status: 400 });
+  }
+
+  let subtotalCents = 0;
+  for (const li of line_items) {
+    subtotalCents += li.price_data.unit_amount * li.quantity;
+  }
+  const subtotalUsd = subtotalCents / 100;
+  const shippingUsd =
+    subtotalUsd >= FREE_SHIPPING_THRESHOLD_USD ? 0 : SHIPPING_USD;
+
+  if (shippingUsd > 0) {
+    line_items.push({
+      quantity: 1,
+      price_data: {
+        currency: 'usd',
+        unit_amount: Math.round(shippingUsd * 100),
+        product_data: {
+          name: 'Shipping',
+          description: 'Standard delivery',
+        },
+      },
+    });
+  }
+
+  const origin = new URL(request.url).origin;
+  const payload = {
+    mode: 'payment',
+    success_url: `${origin}/cart.html?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/cart.html?checkout=cancel`,
+    line_items,
+  };
+
+  const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + env.STRIPE_SECRET_KEY.trim(),
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Stripe-Version': '2023-10-16',
+    },
+    body: objectToStripeForm(payload).toString(),
+  });
+
+  const session = await stripeRes.json();
+  if (!stripeRes.ok) {
+    console.error('Stripe checkout session', session);
+    return Response.json(
+      {
+        error:
+          session.error?.message ||
+          'Could not start checkout. Try again in a moment.',
+      },
+      { status: 502 }
+    );
+  }
+
+  if (!session.url) {
+    return Response.json(
+      { error: 'Checkout session had no redirect URL.' },
+      { status: 502 }
+    );
+  }
+
+  return Response.json({ url: session.url });
+}
+
 function normalizePath(pathname) {
   if (pathname.length > 1 && pathname.endsWith('/')) {
     return pathname.slice(0, -1);
@@ -185,6 +371,11 @@ export default {
 
     if (path === '/api/admin/verify') {
       if (request.method === 'POST') return handleAdminVerify(request, env);
+      return new Response('Method Not Allowed', { status: 405 });
+    }
+
+    if (path === '/api/checkout-session') {
+      if (request.method === 'POST') return handleCheckoutSession(request, env);
       return new Response('Method Not Allowed', { status: 405 });
     }
 

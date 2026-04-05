@@ -148,6 +148,23 @@
     });
   }
 
+  function revealFadeUp(elements) {
+    if (!elements.length) return;
+    if (!('IntersectionObserver' in window)) {
+      elements.forEach((el) => el.classList.add('visible'));
+      return;
+    }
+    const fadeObs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+    );
+    elements.forEach((el) => fadeObs.observe(el));
+  }
+
   async function init() {
     const grid = document.getElementById('gallery-grid');
     if (!grid) return;
@@ -158,6 +175,7 @@
     initFilter(items, map);
 
     window.openModal = (id) => openModal(id, map);
+
     window.closeModal = closeModal;
     window.closeModalIfBg = closeModalIfBg;
 
@@ -165,15 +183,7 @@
       if (e.key === 'Escape') closeModal();
     });
 
-    const fadeObs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add('visible');
-        });
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
-    );
-    grid.querySelectorAll('.fade-up').forEach((el) => fadeObs.observe(el));
+    revealFadeUp(Array.from(grid.querySelectorAll('.fade-up')));
   }
 
   function start() {

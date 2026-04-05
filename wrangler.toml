@@ -3,9 +3,12 @@
 # Worker (your case — *.workers.dev):
 #   1) npx wrangler d1 create hugh-gallery  (if needed)
 #   2) Set database_id below; run: npx wrangler d1 migrations apply hugh-gallery --remote
-#   3) Secret:
+#      (includes seed data so cart /api/gallery and Stripe checkout share the same piece IDs.)
+#   3) Secrets:
 #        npx wrangler secret put ADMIN_API_SECRET
 #      Paste a long random string; use the same value when logging into /admin.html
+#        npx wrangler secret put STRIPE_SECRET_KEY
+#      Your Stripe secret key (sk_live_… or sk_test_…). Needed for cart checkout.
 #   4) Deploy (copies HTML/CSS/JS/icons into public/, then uploads Worker + assets):
 #        npm run deploy
 #   5) Local: cp .dev.vars.example .dev.vars && npx wrangler d1 migrations apply hugh-gallery --local && npm run dev
