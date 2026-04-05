@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cart — Hugh Phibbs</title>
+  <meta name="description" content="Your shopping cart — Hugh Phibbs original art." />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── CART-SPECIFIC ─── */
+
+    .cart-section {
+      min-height: calc(100vh - var(--nav-h));
+      padding-top: calc(var(--nav-h) + 5rem);
+      padding-bottom: 6rem;
+    }
+
+    .cart-header {
+      margin-bottom: 3rem;
+    }
+
+    .cart-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    /* ── CART ITEMS ─── */
+    .cart-items {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .cart-empty {
+      text-align: center;
+      padding: 6rem 2rem;
+    }
+
+    .cart-empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .cart-empty h2 {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .cart-empty p { margin: 0 auto 2rem; }
+
+    .cart-item {
+      display: grid;
+      grid-template-columns: 90px 1fr auto;
+      gap: 1.25rem;
+      align-items: center;
+      background: var(--white);
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-bottom: 0.75rem;
+      box-shadow: 0 2px 16px rgba(58,46,46,0.05);
+      transition: box-shadow var(--transition);
+    }
+
+    .cart-item:hover { box-shadow: 0 8px 32px rgba(58,46,46,0.1); }
+
+    .cart-item-thumb {
+      width: 90px; height: 90px;
+      border-radius: 12px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .cart-item-thumb .img-placeholder {
+      height: 100%;
+      aspect-ratio: unset;
+      font-size: 0;
+    }
+
+    .cart-item-info {
+      flex: 1;
+    }
+
+    .cart-item-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 0.35rem;
+    }
+
+    .cart-item-meta {
+      font-size: 0.78rem;
+      color: var(--warm-grey);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .cart-item-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+
+    .qty-btn {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(58,46,46,0.15);
+      background: transparent;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ink);
+      transition: all var(--transition);
+    }
+    .qty-btn:hover { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+
+    .qty-value {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      min-width: 1.5rem;
+      text-align: center;
+    }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      font-size: 0.8rem;
+      color: var(--warm-grey);
+      cursor: pointer;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      transition: color var(--transition), background var(--transition);
+      letter-spacing: 0.05em;
+    }
+    .remove-btn:hover { color: #c0392b; background: #fff0ee; }
+
+    .cart-item-price {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--ink);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    /* ── ORDER SUMMARY ─── */
+    .order-summary {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 2.5rem;
+      box-shadow: 0 4px 32px rgba(58,46,46,0.07);
+      position: sticky;
+      top: calc(var(--nav-h) + 1.5rem);
+    }
+
+    .order-summary h3 {
+      font-size: 1.4rem;
+      font-weight: 400;
+      margin-bottom: 1.75rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(58,46,46,0.08);
+    }
+
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .summary-line .label { color: var(--warm-grey); }
+    .summary-line .value { font-weight: 500; color: var(--ink); }
+
+    .summary-line.total {
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(58,46,46,0.08);
+      font-size: 1.05rem;
+    }
+
+    .summary-line.total .label { color: var(--ink); font-weight: 500; }
+    .summary-line.total .value {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      justify-content: center;
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      padding: 1rem;
+    }
+
+    .checkout-note {
+      font-size: 0.75rem;
+      color: var(--warm-grey);
+      text-align: center;
+      margin-top: 1rem;
+      max-width: none;
+    }
+
+    .shipping-badge {
+      background: linear-gradient(135deg, var(--mint), #eafaf4);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 1.25rem;
+    }
+
+    /* Continue shopping */
+    .continue-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--warm-grey);
+      margin-bottom: 1.75rem;
+      transition: color var(--transition);
+    }
+    .continue-link:hover { color: var(--ink); }
+
+    @media (max-width: 900px) {
+      .cart-layout { grid-template-columns: 1fr; }
+      .order-summary { position: static; }
+    }
+
+    @media (max-width: 580px) {
+      .cart-item { grid-template-columns: 70px 1fr; }
+      .cart-item-price { grid-column: 2; text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">Hugh <span>Phibbs</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <button class="nav-cart-btn" onclick="window.location='cart.html'">
+        🛒 Cart <span class="cart-count">0</span>
+      </button>
+      <button class="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- CART SECTION -->
+  <section class="cart-section">
+    <div class="cart-header">
+      <span class="section-label">Your Selection</span>
+      <h1>Shopping Cart</h1>
+    </div>
+
+    <a href="gallery.html" class="continue-link">← Continue Shopping</a>
+
+    <div id="cart-content"></div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">Hugh Phibbs</div>
+        <p class="footer-tagline">Original paintings and limited prints, made with care in the Pacific Northwest.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Get in Touch</h4>
+        <ul>
+          <li><a href="mailto:hello@hughphibbs.com">hello@hughphibbs.com</a></li>
+          <li><a href="contact.html">Commission a piece</a></li>
+          <li><a href="#">Instagram</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Hugh Phibbs. All rights reserved.</span>
+      <span>Handcrafted with love ♥</span>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+  <script>
+    const COLORS = {
+      'garden-reverie': 'linear-gradient(135deg,#f7c5c0,#d5c9e8,#bfd9f0)',
+      'drift':          'linear-gradient(160deg,#bfd9f0,#c4a8d8,#f7c5c0)',
+      'peach-blossom':  'linear-gradient(135deg,#f2c9a0,#f7c5c0,#e8a8b0)',
+      'morning-mist':   'linear-gradient(160deg,#c5e4d8,#bfd9f0,#f5eac0)',
+      'reverie-4':      'linear-gradient(125deg,#c4a8d8,#f7c5c0,#f5eac0)',
+      'warm-study':     'linear-gradient(170deg,#f5eac0,#f2c9a0,#e8a8b0)',
+      'spectrum':       'linear-gradient(115deg,#d5c9e8,#bfd9f0,#c5e4d8,#f7c5c0)',
+      'rose-study':     'linear-gradient(150deg,#e8a8b0,#f7c5c0,#c4a8d8)',
+      'lavender-haze':  'linear-gradient(145deg,#f7c5c0,#d5c9e8,#bfd9f0)',
+      'first-light':    'linear-gradient(145deg,#c5e4d8,#bfd9f0,#f5eac0)',
+      'bloom-3':        'linear-gradient(145deg,#f2c9a0,#f7c5c0,#c4a8d8)',
+    };
+
+    function formatPrice(n) {
+      return '$' + n.toLocaleString('en-US');
+    }
+
+    function renderCart() {
+      const cart = getCart();
+      const container = document.getElementById('cart-content');
+
+      if (cart.length === 0) {
+        container.innerHTML = `
+          <div class="cart-empty">
+            <div class="cart-empty-icon">🎨</div>
+            <h2>Your cart is empty</h2>
+            <p>Browse the gallery to discover Hugh's latest original works and prints.</p>
+            <a href="gallery.html" class="btn btn-primary">Visit the Gallery</a>
+          </div>
+        `;
+        return;
+      }
+
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const shipping = subtotal >= 500 ? 0 : 25;
+      const total = subtotal + shipping;
+
+      const itemsHTML = cart.map(item => {
+        const bg = COLORS[item.id] || 'linear-gradient(135deg, #f7c5c0, #d5c9e8)';
+        return `
+          <div class="cart-item" id="item-${item.id}">
+            <div class="cart-item-thumb">
+              <div class="img-placeholder" style="background:${bg};height:100%;aspect-ratio:unset;"></div>
+            </div>
+            <div class="cart-item-info">
+              <div class="cart-item-title">${item.title}</div>
+              <div class="cart-item-meta">Original artwork</div>
+              <div class="cart-item-controls">
+                <button class="qty-btn" onclick="changeQty('${item.id}', -1)">−</button>
+                <span class="qty-value">${item.qty}</span>
+                <button class="qty-btn" onclick="changeQty('${item.id}', 1)">+</button>
+                <button class="remove-btn" onclick="removeItem('${item.id}')">Remove</button>
+              </div>
+            </div>
+            <div class="cart-item-price">${formatPrice(item.price * item.qty)}</div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="cart-layout">
+          <div class="cart-items">${itemsHTML}</div>
+          <div class="order-summary">
+            <h3>Order Summary</h3>
+            <div class="summary-line">
+              <span class="label">Subtotal (${cart.reduce((s,i)=>s+i.qty,0)} item${cart.reduce((s,i)=>s+i.qty,0)!==1?'s':''})</span>
+              <span class="value">${formatPrice(subtotal)}</span>
+            </div>
+            <div class="summary-line">
+              <span class="label">Shipping</span>
+              <span class="value">${shipping === 0 ? 'Free' : formatPrice(shipping)}</span>
+            </div>
+            <div class="summary-line total">
+              <span class="label">Total</span>
+              <span class="value">${formatPrice(total)}</span>
+            </div>
+            ${shipping > 0 ? `<div class="shipping-badge">🌿 Spend ${formatPrice(500 - subtotal)} more for free shipping</div>` : `<div class="shipping-badge">🌿 You qualify for free shipping!</div>`}
+            <button class="btn btn-primary checkout-btn" onclick="checkout()">Proceed to Checkout →</button>
+            <p class="checkout-note">Secure checkout. All payments encrypted. Every purchase supports an independent artist.</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function changeQty(id, delta) {
+      const cart = getCart();
+      const item = cart.find(i => i.id === id);
+      if (!item) return;
+      item.qty = Math.max(1, item.qty + delta);
+      saveCart(cart);
+      updateCartCount();
+      renderCart();
+    }
+
+    function removeItem(id) {
+      let cart = getCart();
+      cart = cart.filter(i => i.id !== id);
+      saveCart(cart);
+      updateCartCount();
+      renderCart();
+    }
+
+    function checkout() {
+      showToast('Checkout coming soon — email hugh to complete your purchase!');
+    }
+
+    renderCart();
+  </script>
+</body>
+</html>

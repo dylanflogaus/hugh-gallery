@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — Hugh Phibbs</title>
+  <meta name="description" content="Get in touch with Hugh Phibbs about commissions, availability, and print orders." />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── CONTACT-SPECIFIC ─── */
+
+    .contact-hero {
+      padding-top: calc(var(--nav-h) + 5rem);
+      padding-bottom: 4rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .contact-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 50% 60% at 80% 30%, var(--lavender) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 50% at 20% 70%, var(--blush) 0%, transparent 60%);
+      opacity: 0.5;
+    }
+
+    .contact-hero-inner { position: relative; z-index: 1; }
+    .contact-hero h1 { margin-bottom: 0.75rem; }
+    .contact-hero p { margin: 0 auto; font-size: 1.05rem; }
+
+    /* ── CONTACT LAYOUT ─── */
+    .contact-layout {
+      display: grid;
+      grid-template-columns: 5fr 4fr;
+      gap: 4rem;
+      align-items: start;
+      padding-top: 1rem;
+    }
+
+    /* ── FORM ─── */
+    .contact-form-wrap {
+      background: var(--white);
+      border-radius: 28px;
+      padding: 3rem;
+      box-shadow: 0 4px 32px rgba(58,46,46,0.07);
+    }
+
+    .form-title {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-subtitle {
+      font-size: 0.9rem;
+      color: var(--warm-grey);
+      margin-bottom: 2rem;
+      max-width: none;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--warm-grey);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      border: 1.5px solid rgba(58,46,46,0.12);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--ink);
+      background: var(--cream);
+      transition: border-color var(--transition), box-shadow var(--transition);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--rose);
+      box-shadow: 0 0 0 3px rgba(232,168,176,0.2);
+    }
+
+    .form-group textarea { resize: vertical; min-height: 130px; }
+
+    .form-group select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A7A7A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 2.5rem;
+    }
+
+    .form-submit {
+      margin-top: 1rem;
+    }
+
+    .form-submit .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .form-note {
+      font-size: 0.78rem;
+      color: var(--warm-grey);
+      text-align: center;
+      margin-top: 1rem;
+      max-width: none;
+    }
+
+    /* ── SIDEBAR ─── */
+    .contact-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .info-card {
+      border-radius: 20px;
+      padding: 2rem;
+    }
+
+    .info-card-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .info-card h3 {
+      font-size: 1.1rem;
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+    }
+
+    .info-card p {
+      font-size: 0.88rem;
+      max-width: none;
+      margin-bottom: 0.75rem;
+    }
+
+    .info-card a {
+      color: var(--rose);
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: color var(--transition);
+    }
+    .info-card a:hover { color: var(--ink); }
+
+    .commission-card {
+      background: var(--ink);
+      border-radius: 28px;
+      padding: 2.5rem;
+      color: var(--cream);
+    }
+
+    .commission-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 300;
+      color: var(--cream);
+      margin-bottom: 0.75rem;
+    }
+
+    .commission-card p {
+      color: rgba(255,255,255,0.65);
+      font-size: 0.9rem;
+      max-width: none;
+      margin-bottom: 1.5rem;
+    }
+
+    .commission-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .comm-step {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .comm-step-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--rose);
+      flex-shrink: 0;
+    }
+
+    /* fade-up */
+    .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-up.visible { opacity: 1; transform: none; }
+
+    @media (max-width: 900px) {
+      .contact-layout { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">Hugh <span>Phibbs</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <button class="nav-cart-btn" onclick="window.location='cart.html'">
+        🛒 Cart <span class="cart-count">0</span>
+      </button>
+      <button class="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="contact-hero">
+    <div class="contact-hero-inner">
+      <span class="section-label">Say Hello</span>
+      <h1>Get in Touch</h1>
+      <p>Whether you're interested in a piece, a commission, or simply want to say hello — Hugh would love to hear from you.</p>
+    </div>
+  </header>
+
+  <!-- CONTACT SECTION -->
+  <section>
+    <div class="contact-layout">
+
+      <!-- FORM -->
+      <div class="contact-form-wrap fade-up">
+        <div class="form-title">Send a Message</div>
+        <p class="form-subtitle">Fill in the form below and Hugh will get back to you within 2–3 business days.</p>
+
+        <form name="contact" method="POST" data-netlify="true" action="/thank-you.html">
+          <input type="hidden" name="form-name" value="contact" />
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="first-name">First Name</label>
+              <input type="text" id="first-name" name="first-name" placeholder="Jane" required />
+            </div>
+            <div class="form-group">
+              <label for="last-name">Last Name</label>
+              <input type="text" id="last-name" name="last-name" placeholder="Smith" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="jane@example.com" required />
+          </div>
+
+          <div class="form-group">
+            <label for="subject">I'm enquiring about</label>
+            <select id="subject" name="subject" required>
+              <option value="" disabled selected>Select a topic</option>
+              <option value="purchase">Purchasing a piece</option>
+              <option value="commission">Commissioning original work</option>
+              <option value="print">Print availability</option>
+              <option value="shipping">Shipping &amp; delivery</option>
+              <option value="other">Something else</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="message">Your Message</label>
+            <textarea id="message" name="message" placeholder="Tell Hugh what's on your mind…" required></textarea>
+          </div>
+
+          <div class="form-submit">
+            <button type="submit" class="btn btn-primary">Send Message →</button>
+          </div>
+
+          <p class="form-note">Your details are private and will never be shared with third parties.</p>
+        </form>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="contact-sidebar">
+
+        <div class="info-card fade-up" style="background:linear-gradient(135deg,var(--blush),#fff5f5); transition-delay:0.1s">
+          <div class="info-card-icon">✉️</div>
+          <h3>Email Directly</h3>
+          <p>For a quicker response, send Hugh a direct message.</p>
+          <a href="mailto:hello@hughphibbs.com">hello@hughphibbs.com</a>
+        </div>
+
+        <div class="info-card fade-up" style="background:linear-gradient(135deg,var(--mint),#edfaf4); transition-delay:0.15s">
+          <div class="info-card-icon">📦</div>
+          <h3>Shipping &amp; Delivery</h3>
+          <p>Originals are carefully packed and shipped worldwide. All orders include tracking and insurance. Allow 5–10 days for delivery.</p>
+        </div>
+
+        <div class="info-card fade-up" style="background:linear-gradient(135deg,var(--lavender),#f5f0ff); transition-delay:0.2s">
+          <div class="info-card-icon">📸</div>
+          <h3>Follow the Work</h3>
+          <p>Catch behind-the-scenes studio moments and works-in-progress on Instagram.</p>
+          <a href="#">@hughphibbs</a>
+        </div>
+
+        <div class="commission-card fade-up" style="transition-delay:0.25s">
+          <h3>Commission a Piece</h3>
+          <p>Hugh accepts a limited number of commissions each year. A commissioned work means a painting created especially for you, your space, and your story.</p>
+          <div class="commission-steps">
+            <div class="comm-step"><span class="comm-step-dot"></span> Initial consultation &amp; discussion</div>
+            <div class="comm-step"><span class="comm-step-dot"></span> Sketch and colour study</div>
+            <div class="comm-step"><span class="comm-step-dot"></span> Full painting, 4–8 weeks</div>
+            <div class="comm-step"><span class="comm-step-dot"></span> Review and delivery</div>
+          </div>
+          <a href="#" class="btn btn-blush" style="font-size:0.8rem; padding:0.7rem 1.5rem;">Start a Commission</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">Hugh Phibbs</div>
+        <p class="footer-tagline">Original paintings and limited prints, made with care in the Pacific Northwest.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Get in Touch</h4>
+        <ul>
+          <li><a href="mailto:hello@hughphibbs.com">hello@hughphibbs.com</a></li>
+          <li><a href="contact.html">Commission a piece</a></li>
+          <li><a href="#">Instagram</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Hugh Phibbs. All rights reserved.</span>
+      <span>Handcrafted with love ♥</span>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

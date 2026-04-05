@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery — Hugh Phibbs</title>
+  <meta name="description" content="Browse original paintings and limited prints by Hugh Phibbs. Each piece is available for purchase." />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── GALLERY-SPECIFIC ─── */
+
+    .gallery-hero {
+      padding-top: calc(var(--nav-h) + 5rem);
+      padding-bottom: 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gallery-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 80%, var(--blush) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 80% 20%, var(--lavender) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, var(--mint) 0%, transparent 70%);
+      opacity: 0.45;
+    }
+
+    .gallery-hero-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .gallery-hero h1 {
+      margin-bottom: 0.75rem;
+    }
+
+    .gallery-hero p {
+      margin: 0 auto;
+      font-size: 1.05rem;
+    }
+
+    /* ── FILTER BAR ─── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      padding: 2rem 5vw 0;
+    }
+
+    .filter-label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--warm-grey);
+      margin-right: 0.25rem;
+    }
+
+    .filter-btn {
+      background: transparent;
+      border: 1.5px solid rgba(58,46,46,0.18);
+      border-radius: 50px;
+      padding: 0.45rem 1.1rem;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      color: var(--warm-grey);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--cream);
+    }
+
+    /* ── GALLERY GRID ─── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.75rem;
+      padding: 2.5rem 5vw 5rem;
+    }
+
+    /* Large featured items */
+    .shop-card.large {
+      grid-column: span 2;
+    }
+
+    .shop-card.large .shop-card-img {
+      aspect-ratio: 16/9;
+    }
+
+    .shop-card {
+      border-radius: 20px;
+      overflow: hidden;
+      background: var(--white);
+      box-shadow: 0 2px 20px rgba(58,46,46,0.05);
+      transition: transform var(--transition), box-shadow var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .shop-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 24px 64px rgba(58,46,46,0.12);
+    }
+
+    .shop-card-img {
+      width: 100%;
+      aspect-ratio: 4/5;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shop-card-img .img-placeholder {
+      height: 100%;
+      aspect-ratio: unset;
+      font-size: 0.8rem;
+      transition: transform 0.6s ease;
+    }
+
+    .shop-card:hover .shop-card-img .img-placeholder {
+      transform: scale(1.04);
+    }
+
+    /* Status badges */
+    .badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      border-radius: 8px;
+      padding: 0.3rem 0.7rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      z-index: 1;
+    }
+
+    .badge-new    { background: var(--mint);    color: #2d6050; }
+    .badge-sold   { background: rgba(58,46,46,0.75); color: var(--cream); }
+    .badge-print  { background: var(--butter);  color: #8a6a00; }
+    .badge-last   { background: var(--blush);   color: #8a3040; }
+
+    /* Quick-view hover overlay */
+    .shop-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(58,46,46,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .shop-card:hover .shop-card-overlay { opacity: 1; }
+
+    .overlay-btn {
+      background: var(--cream);
+      color: var(--ink);
+      border: none;
+      border-radius: 50px;
+      padding: 0.65rem 1.5rem;
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: transform var(--transition);
+    }
+    .overlay-btn:hover { transform: scale(1.05); }
+
+    .shop-card-body {
+      padding: 1.25rem 1.25rem 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .shop-card-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 0.3rem;
+    }
+
+    .shop-card-meta {
+      font-size: 0.75rem;
+      color: var(--warm-grey);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .shop-card-desc {
+      font-size: 0.875rem;
+      color: var(--warm-grey);
+      margin-bottom: auto;
+      padding-bottom: 1rem;
+    }
+
+    .shop-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(58,46,46,0.08);
+      padding-top: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .shop-price {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .shop-price.sold {
+      text-decoration: line-through;
+      color: var(--warm-grey);
+      font-size: 1rem;
+    }
+
+    .btn-add-full {
+      background: var(--blush);
+      border: none;
+      border-radius: 10px;
+      padding: 0.6rem 1.2rem;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--ink);
+      letter-spacing: 0.05em;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-add-full:hover { background: var(--rose); transform: scale(1.04); }
+    .btn-add-full:disabled { background: rgba(58,46,46,0.1); color: var(--warm-grey); cursor: not-allowed; transform: none; }
+
+    /* ── MODAL LIGHTBOX ─── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20,14,14,0.65);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--cream);
+      border-radius: 28px;
+      max-width: 860px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      overflow: hidden;
+      transform: scale(0.94) translateY(20px);
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      position: relative;
+    }
+
+    .modal-overlay.open .modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-img {
+      aspect-ratio: 1;
+      width: 100%;
+    }
+
+    .modal-img .img-placeholder {
+      height: 100%;
+      aspect-ratio: unset;
+    }
+
+    .modal-content {
+      padding: 3rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 300;
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-meta {
+      font-size: 0.8rem;
+      color: var(--warm-grey);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+
+    .modal-desc {
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+
+    .modal-price {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1.25rem; right: 1.25rem;
+      background: rgba(58,46,46,0.1);
+      border: none;
+      border-radius: 50%;
+      width: 36px; height: 36px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background var(--transition);
+    }
+    .modal-close:hover { background: rgba(58,46,46,0.2); }
+
+    /* fade-up delay helpers */
+    .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-up.visible { opacity: 1; transform: none; }
+
+    @media (max-width: 900px) {
+      .gallery-grid { grid-template-columns: 1fr 1fr; }
+      .shop-card.large { grid-column: span 1; }
+      .shop-card.large .shop-card-img { aspect-ratio: 4/5; }
+    }
+    @media (max-width: 580px) {
+      .gallery-grid { grid-template-columns: 1fr; gap: 1.25rem; }
+      .modal { grid-template-columns: 1fr; }
+      .modal-img { aspect-ratio: 4/3; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">Hugh <span>Phibbs</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <button class="nav-cart-btn" onclick="window.location='cart.html'">
+        🛒 Cart <span class="cart-count">0</span>
+      </button>
+      <button class="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="gallery-hero">
+    <div class="gallery-hero-inner">
+      <span class="section-label">The Gallery</span>
+      <h1>Original Works &amp; Prints</h1>
+      <p>Each painting is one-of-a-kind. Watercolour, acrylic, and mixed media — all hand-created by Hugh.</p>
+    </div>
+  </header>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <span class="filter-label">Filter:</span>
+    <button class="filter-btn active" data-filter="all">All Works</button>
+    <button class="filter-btn" data-filter="original">Originals</button>
+    <button class="filter-btn" data-filter="print">Prints</button>
+    <button class="filter-btn" data-filter="watercolour">Watercolour</button>
+    <button class="filter-btn" data-filter="abstract">Abstract</button>
+    <button class="filter-btn" data-filter="floral">Floral</button>
+  </div>
+
+  <!-- GALLERY GRID -->
+  <div class="gallery-grid" id="gallery-grid">
+
+    <!-- FEATURED LARGE -->
+    <div class="shop-card large fade-up" data-tags="original watercolour floral">
+      <div class="shop-card-img">
+        <div class="img-placeholder" style="background: linear-gradient(135deg, #f7c5c0 0%, #d5c9e8 35%, #bfd9f0 70%, #c5e4d8 100%);">
+          <span>Garden Reverie</span>
+        </div>
+        <span class="badge badge-new">New</span>
+        <div class="shop-card-overlay">
+          <button class="overlay-btn" onclick="openModal('garden-reverie')">Quick View</button>
+        </div>
+      </div>
+      <div class="shop-card-body">
+        <div class="shop-card-title">Garden Reverie</div>
+        <div class="shop-card-meta">Watercolour on cold-press · 60×80 cm · 2025</div>
+        <p class="shop-card-desc">A lush celebration of midsummer — petals dissolving into soft pools of colour, referencing the abundance and impermanence of bloom.</p>
+        <div class="shop-card-footer">
+          <span class="shop-price">$1,850</span>
+          <button class="btn-add-full" onclick="addToCart('garden-reverie','Garden Reverie',1850,'#d5c9e8')">+ Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 2 -->
+    <div class="shop-card fade-up" style="transition-delay:0.05s" data-tags="original abstract">
+      <div class="shop-card-img">
+        <div class="img-placeholder" style="background: linear-gradient(160deg, #bfd9f0 0%, #c4a8d8 60%, #f7c5c0 100%);">
+          <span>Drift</span>
+        </div>
+        <div class="shop-card-overlay">
+          <button class="overlay-btn" onclick="openModal('drift')">Quick View</button>
+        </div>
+      </div>
+      <div class="shop-card-body">
+        <div class="shop-card-title">Drift</div>
+        <div class="shop-card-meta">Acrylic wash · 40×50 cm · 2025</div>
+        <p class="shop-card-desc">Layers of translucent blue and violet, exploring movement and stillness at once.</p>
+        <div class="shop-card-footer">
+          <span class="shop-price">$980</span>
+          <button class="btn-add-full" onclick="addToCart('drift','Drift',980,'#bfd9f0')">+ Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 3 -->
+    <div class="shop-card fade-up" style="transition-delay:0.1s" data-tags="print floral">
+      <div class="shop-card-img">
+        <div class="img-placeholder" style="background: linear-gradient(135deg, #f2c9a0 0%, #f7c5c0 50%, #e8a8b0 100%);">
+          <span>Peach Blossom</span>
+        </div>
+        <span class="badge badge-print">Print</span>
+        <div class="shop-card-overlay">
+          <button class="overlay-btn" onclick="openModal('peach-blossom')">Quick View</button>
+        </div>
+      </div>
+      <div class="shop-card-body">
+        <div class="shop-card-title">Peach Blossom</div>
+        <div class="shop-card-meta">Giclee print · Ed. of 25 · A2</div>
+        <p class="shop-card-desc">A delicate study of spring stone-fruit blossoms, rendered in warm peach and rose tones.</p>
+        <div class="shop-card-footer">
+          <span class="shop-price">$290</span>
+          <button class="btn-add-full" onclick="addToCart('peach-blossom','Peach Blossom (Print)',290,'#f2c9a0')">+ Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 4 -->
+    <div class="shop-card fade-up" style="transition-delay:0.1s" data-tags="original watercolour">
+      <div class="shop-card-img">
+        <div class="img-placeholder" style="background: linear-gradient(160deg, #c5e4d8 0%, #bfd9f0 50%, #f5eac0 100%);">
+          <span>Morning Mist</span>
+        </div>
+        <span class="badge badge-last">1 Left</span>
+        <div class="shop-card-overlay">
+          <button class="overlay-btn" onclick="openModal('morning-mist')">Quick View</button>
+        </div>
+      </div>
+      <div class="shop-card-body">
+        <div class="shop-card-title">Morning Mist</div>
+        <div class="shop-card-meta">Watercolour · 30×40 cm · 2024</div>
+        <p class="shop-card-desc">Soft seafoam and mint evoke the hush of a morning garden before the world wakes.</p>
+        <div class="shop-card-footer">
+          <span class="shop-price">$780</span>
+          <button class="btn-add-full" onclick="addToCart('morning-mist','Morning Mist',780,'#c5e4d8')">+ Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 5 -->
+    <div class="shop-card fade-up" style="transition-delay:0.15s" data-tags="original abstract">
+      <div class="shop-card-img">
+        <div class="img-placeholder" style="background: linear-gradient(125deg, #c4a8d8 0%, #f7c5c0 50%, #f5eac0 100%);">
+          <span>Reverie No. 4</span>
+        </div>
+        <div class="shop-card-overlay">
+          <button class="overlay-btn" onclick="openModal('reverie-4')">Quick View</button>
+        </div>
+      </div>
+      <div class="shop-card-body">
+        <div class="shop-card-title">Reverie No. 4</div>
+        <div class="shop-card-meta">Mixed media · 50×50 cm · 2025</div>
+        <p class="shop-card-desc">Part of an ongoing abstract series meditating on memory and colour temperature.</p>
+        <div class="shop-card-footer">
+          <span class="shop-price">$1,200</span>
+          <button class="btn-add-full" onclick="addToCart('reverie-4','Reverie No. 4',1200,'#c4a8d8')">+ Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 6 SOLD -->
+    <div class="shop-card fade-up" style="transition-delay:0.2s" data-tags="original floral watercolour">
+      <div class="shop-card-img">
+        <div class="img-placeholder" style="background: linear-gradient(140deg, #a8c5b0 0%, #c5e4d8 40%, #bfd9f0 100%); opacity:0.7;">
+          <span>Wild Meadow</span>
+        </div>
+        <span class="badge badge-sold">Sold</span>
+      </div>
+      <div class="shop-card-body">
+        <div class="shop-card-title">Wild Meadow</div>
+        <div class="shop-card-meta">Watercolour · 40×55 cm · 2024</div>
+        <p class="shop-card-desc">A joyful scatter of wildflowers in sage, mint, and sky blue. This piece has found its home.</p>
+        <div class="shop-card-footer">
+          <span class="shop-price sold">$1,050</span>
+          <button class="btn-add-full" disabled>Sold</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 7 -->
+    <div class="shop-card fade-up" style="transition-delay:0.05s" data-tags="print abstract">
+      <div class="shop-card-img">
+        <div class="img-placeholder" style="background: linear-gradient(170deg, #f5eac0 0%, #f2c9a0 40%, #e8a8b0 100%);">
+          <span>Warm Study</span>
+        </div>
+        <span class="badge badge-print">Print</span>
+        <div class="shop-card-overlay">
+          <button class="overlay-btn" onclick="openModal('warm-study')">Quick View</button>
+        </div>
+      </div>
+      <div class="shop-card-body">
+        <div class="shop-card-title">Warm Study</div>
+        <div class="shop-card-meta">Giclee print · Ed. of 15 · A3</div>
+        <p class="shop-card-desc">Golden butter, peach, and rose — a study in warmth and late afternoon light.</p>
+        <div class="shop-card-footer">
+          <span class="shop-price">$195</span>
+          <button class="btn-add-full" onclick="addToCart('warm-study','Warm Study (Print)',195,'#f5eac0')">+ Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 8 LARGE -->
+    <div class="shop-card large fade-up" style="transition-delay:0.1s" data-tags="original abstract watercolour">
+      <div class="shop-card-img">
+        <div class="img-placeholder" style="background: linear-gradient(115deg, #d5c9e8 0%, #bfd9f0 25%, #c5e4d8 50%, #f7c5c0 75%, #f5eac0 100%);">
+          <span>Spectrum</span>
+        </div>
+        <span class="badge badge-new">New</span>
+        <div class="shop-card-overlay">
+          <button class="overlay-btn" onclick="openModal('spectrum')">Quick View</button>
+        </div>
+      </div>
+      <div class="shop-card-body">
+        <div class="shop-card-title">Spectrum</div>
+        <div class="shop-card-meta">Watercolour & Ink · 70×100 cm · 2025</div>
+        <p class="shop-card-desc">A full-spectrum wash from lavender through sky, mint, blush, and butter — Hugh's most ambitious piece of the year, exploring the full breadth of his palette.</p>
+        <div class="shop-card-footer">
+          <span class="shop-price">$2,400</span>
+          <button class="btn-add-full" onclick="addToCart('spectrum','Spectrum',2400,'#d5c9e8')">+ Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 9 -->
+    <div class="shop-card fade-up" style="transition-delay:0.05s" data-tags="original floral">
+      <div class="shop-card-img">
+        <div class="img-placeholder" style="background: linear-gradient(150deg, #e8a8b0 0%, #f7c5c0 40%, #c4a8d8 100%);">
+          <span>Rose Study</span>
+        </div>
+        <div class="shop-card-overlay">
+          <button class="overlay-btn" onclick="openModal('rose-study')">Quick View</button>
+        </div>
+      </div>
+      <div class="shop-card-body">
+        <div class="shop-card-title">Rose Study I</div>
+        <div class="shop-card-meta">Watercolour · 25×35 cm · 2024</div>
+        <p class="shop-card-desc">A close, intimate look at the unfurling rose — blush into deep rose, lavender shadows.</p>
+        <div class="shop-card-footer">
+          <span class="shop-price">$620</span>
+          <button class="btn-add-full" onclick="addToCart('rose-study','Rose Study I',620,'#e8a8b0')">+ Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL LIGHTBOX -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModalIfBg(event)">
+    <div class="modal" id="modal">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-img" id="modal-img"></div>
+      <div class="modal-content">
+        <div class="section-label" id="modal-label"></div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-meta" id="modal-meta"></div>
+        <p class="modal-desc" id="modal-desc"></p>
+        <div class="modal-price" id="modal-price"></div>
+        <button class="btn btn-primary" id="modal-add-btn">Add to Cart</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">Hugh Phibbs</div>
+        <p class="footer-tagline">Original paintings and limited prints, made with care in the Pacific Northwest.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Get in Touch</h4>
+        <ul>
+          <li><a href="mailto:hello@hughphibbs.com">hello@hughphibbs.com</a></li>
+          <li><a href="contact.html">Commission a piece</a></li>
+          <li><a href="#">Instagram</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Hugh Phibbs. All rights reserved.</span>
+      <span>Handcrafted with love ♥</span>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+  <script>
+    /* ── FILTER LOGIC ─── */
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.shop-card');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.dataset.filter;
+        cards.forEach(card => {
+          const tags = card.dataset.tags || '';
+          if (filter === 'all' || tags.includes(filter)) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    /* ── MODAL DATA ─── */
+    const artworks = {
+      'garden-reverie': {
+        label: 'Original · 2025',
+        title: 'Garden Reverie',
+        meta: 'Watercolour on cold-press · 60×80 cm',
+        desc: 'A lush celebration of midsummer — petals dissolving into soft pools of colour, referencing the abundance and impermanence of bloom. Unframed; framing available on request.',
+        price: '$1,850',
+        bg: 'linear-gradient(135deg, #f7c5c0, #d5c9e8, #bfd9f0, #c5e4d8)',
+        id: 'garden-reverie', numPrice: 1850
+      },
+      'drift': {
+        label: 'Original · 2025',
+        title: 'Drift',
+        meta: 'Acrylic wash · 40×50 cm',
+        desc: 'Layers of translucent blue and violet, exploring movement and stillness at once. Ships on canvas, ready to hang.',
+        price: '$980',
+        bg: 'linear-gradient(160deg, #bfd9f0, #c4a8d8, #f7c5c0)',
+        id: 'drift', numPrice: 980
+      },
+      'peach-blossom': {
+        label: 'Print · Edition of 25',
+        title: 'Peach Blossom',
+        meta: 'Giclee on archival paper · A2',
+        desc: 'A delicate study of spring stone-fruit blossoms, rendered in warm peach and rose tones. Each print is hand-signed and numbered.',
+        price: '$290',
+        bg: 'linear-gradient(135deg, #f2c9a0, #f7c5c0, #e8a8b0)',
+        id: 'peach-blossom', numPrice: 290
+      },
+      'morning-mist': {
+        label: 'Original · 2024',
+        title: 'Morning Mist',
+        meta: 'Watercolour · 30×40 cm',
+        desc: 'Soft seafoam and mint evoke the hush of a morning garden before the world wakes. Only 1 left — this is the last available original.',
+        price: '$780',
+        bg: 'linear-gradient(160deg, #c5e4d8, #bfd9f0, #f5eac0)',
+        id: 'morning-mist', numPrice: 780
+      },
+      'reverie-4': {
+        label: 'Original · 2025',
+        title: 'Reverie No. 4',
+        meta: 'Mixed media · 50×50 cm',
+        desc: 'Part of an ongoing abstract series meditating on memory and colour temperature. Ink, watercolour, and soft pastel on cotton rag.',
+        price: '$1,200',
+        bg: 'linear-gradient(125deg, #c4a8d8, #f7c5c0, #f5eac0)',
+        id: 'reverie-4', numPrice: 1200
+      },
+      'warm-study': {
+        label: 'Print · Edition of 15',
+        title: 'Warm Study',
+        meta: 'Giclee on archival paper · A3',
+        desc: 'Golden butter, peach, and rose — a study in warmth and late afternoon light. Printed on heavyweight matte paper.',
+        price: '$195',
+        bg: 'linear-gradient(170deg, #f5eac0, #f2c9a0, #e8a8b0)',
+        id: 'warm-study', numPrice: 195
+      },
+      'spectrum': {
+        label: 'Original · 2025',
+        title: 'Spectrum',
+        meta: 'Watercolour & Ink · 70×100 cm',
+        desc: 'A full-spectrum wash from lavender through sky, mint, blush, and butter. Hugh\'s most ambitious piece of the year. Professionally stretched on linen.',
+        price: '$2,400',
+        bg: 'linear-gradient(115deg, #d5c9e8, #bfd9f0, #c5e4d8, #f7c5c0, #f5eac0)',
+        id: 'spectrum', numPrice: 2400
+      },
+      'rose-study': {
+        label: 'Original · 2024',
+        title: 'Rose Study I',
+        meta: 'Watercolour · 25×35 cm',
+        desc: 'A close, intimate look at the unfurling rose — blush into deep rose, lavender shadows. Delicate and luminous. Perfect for a small wall or hallway.',
+        price: '$620',
+        bg: 'linear-gradient(150deg, #e8a8b0, #f7c5c0, #c4a8d8)',
+        id: 'rose-study', numPrice: 620
+      }
+    };
+
+    function openModal(id) {
+      const art = artworks[id];
+      if (!art) return;
+      document.getElementById('modal-label').textContent = art.label;
+      document.getElementById('modal-title').textContent = art.title;
+      document.getElementById('modal-meta').textContent = art.meta;
+      document.getElementById('modal-desc').textContent = art.desc;
+      document.getElementById('modal-price').textContent = art.price;
+      document.getElementById('modal-img').innerHTML = `<div class="img-placeholder" style="background:${art.bg};height:100%;aspect-ratio:unset;"><span>${art.title}</span></div>`;
+      const addBtn = document.getElementById('modal-add-btn');
+      addBtn.onclick = () => { addToCart(art.id, art.title, art.numPrice, ''); closeModal(); };
+      document.getElementById('modal-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function closeModalIfBg(e) {
+      if (e.target.id === 'modal-overlay') closeModal();
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  </script>
+</body>
+</html>

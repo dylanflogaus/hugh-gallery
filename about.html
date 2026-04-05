@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — Hugh Phibbs</title>
+  <meta name="description" content="Learn about artist Hugh Phibbs — his story, practice, and love of colour, watercolour, and abstract painting." />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── ABOUT-SPECIFIC ─── */
+
+    .about-hero {
+      padding-top: calc(var(--nav-h) + 5rem);
+      padding-bottom: 5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-hero::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--lavender) 0%, transparent 70%);
+      top: -100px; right: -150px;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .about-hero-img-wrap {
+      position: relative;
+      z-index: 1;
+    }
+
+    .about-portrait {
+      border-radius: 28px;
+      overflow: hidden;
+      aspect-ratio: 3/4;
+      box-shadow: 0 32px 80px rgba(58,46,46,0.15);
+    }
+
+    .about-portrait .img-placeholder { height: 100%; aspect-ratio: unset; }
+
+    .about-float-badge {
+      position: absolute;
+      bottom: -20px; right: -20px;
+      background: var(--butter);
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 12px 40px rgba(58,46,46,0.12);
+      text-align: center;
+    }
+
+    .about-float-badge .number {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .about-float-badge .label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--warm-grey);
+      margin-top: 0.25rem;
+    }
+
+    .about-hero-text {
+      position: relative;
+      z-index: 1;
+    }
+
+    .about-hero-text h1 {
+      margin-bottom: 1.25rem;
+    }
+
+    .about-hero-text h1 em {
+      font-style: italic;
+      color: var(--rose);
+      font-family: 'Playfair Display', serif;
+    }
+
+    .about-hero-text > p {
+      font-size: 1.05rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Quote block */
+    .pull-quote {
+      background: linear-gradient(135deg, var(--blush), var(--lavender));
+      border-radius: 20px;
+      padding: 2.5rem;
+      margin: 2rem 0;
+    }
+
+    .pull-quote p {
+      font-family: var(--font-italic);
+      font-style: italic;
+      font-size: 1.25rem;
+      color: var(--ink);
+      max-width: none;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .pull-quote cite {
+      display: block;
+      font-family: var(--font-body);
+      font-style: normal;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--warm-grey);
+      margin-top: 1rem;
+    }
+
+    /* Process section */
+    .process-section {
+      background: var(--ink);
+      color: var(--cream);
+      border-radius: 32px;
+      padding: 5rem;
+      margin: 0 5vw;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+      overflow: hidden;
+    }
+
+    .process-section h2 { color: var(--cream); margin-bottom: 1rem; }
+    .process-section p { color: rgba(255,255,255,0.65); }
+
+    .process-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    .process-step {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 300;
+      color: var(--rose);
+      line-height: 1;
+      flex-shrink: 0;
+      width: 2.5rem;
+    }
+
+    .step-content h4 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 0.35rem;
+    }
+
+    .step-content p { font-size: 0.9rem; max-width: none; margin: 0; }
+
+    /* Materials */
+    .materials-section {
+      padding: 5rem 5vw;
+    }
+
+    .materials-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+    }
+
+    .material-card {
+      border-radius: 16px;
+      padding: 1.75rem 1.5rem;
+      text-align: center;
+    }
+
+    .material-icon {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .material-name {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+    }
+
+    .material-desc {
+      font-size: 0.8rem;
+      color: var(--warm-grey);
+      max-width: none;
+    }
+
+    /* Studio shots */
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      grid-template-rows: 280px 200px;
+      gap: 12px;
+      margin-top: 2.5rem;
+    }
+
+    .studio-cell {
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .studio-cell:first-child { grid-row: 1/3; border-radius: 24px; }
+    .studio-cell .img-placeholder { height: 100%; aspect-ratio: unset; font-size: 0.8rem; }
+
+    /* fade-up */
+    .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-up.visible { opacity: 1; transform: none; }
+
+    @media (max-width: 900px) {
+      .about-hero { grid-template-columns: 1fr; gap: 3rem; }
+      .about-hero-img-wrap { max-width: 360px; margin: 0 auto; }
+      .process-section { grid-template-columns: 1fr; padding: 3rem 2rem; margin: 0 1rem; }
+      .materials-grid { grid-template-columns: 1fr 1fr; }
+      .studio-grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+      .studio-cell:first-child { grid-row: auto; grid-column: span 2; }
+    }
+
+    @media (max-width: 580px) {
+      .materials-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">Hugh <span>Phibbs</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <button class="nav-cart-btn" onclick="window.location='cart.html'">
+        🛒 Cart <span class="cart-count">0</span>
+      </button>
+      <button class="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ABOUT HERO -->
+  <section class="about-hero">
+    <div class="about-hero-img-wrap fade-up">
+      <div class="about-portrait">
+        <div class="img-placeholder" style="background: linear-gradient(160deg, #a8c5b0 0%, #bfd9f0 50%, #d5c9e8 100%); height:100%;">
+          <span>Portrait of Hugh</span>
+        </div>
+      </div>
+      <div class="about-float-badge">
+        <div class="number">12+</div>
+        <div class="label">Years Creating</div>
+      </div>
+    </div>
+
+    <div class="about-hero-text fade-up" style="transition-delay:0.1s">
+      <span class="section-label">The Artist</span>
+      <h1>Painter of <em>light</em><br>and colour</h1>
+      <p>Hugh Phibbs is a contemporary watercolour and abstract artist based in the Pacific Northwest. His work explores the relationship between colour, light, and the natural world — finding beauty in the quiet, the fleeting, and the overlooked.</p>
+      <p>Born and raised in a family of painters, Hugh grew up watching his mother work at her studio easel. He studied fine art at the Pacific Northwest College of Art before spending several years in Europe absorbing the light of Provence and the rain-soaked gardens of the English countryside.</p>
+      <div class="pull-quote">
+        <p>"I want people to feel like they've stepped into a garden after rain — that particular sense of stillness and heightened colour."</p>
+        <cite>— Hugh Phibbs</cite>
+      </div>
+      <a href="gallery.html" class="btn btn-primary">Browse the Gallery</a>
+    </div>
+  </section>
+
+  <!-- PROCESS SECTION -->
+  <div class="process-section fade-up">
+    <div>
+      <span class="section-label" style="color:var(--rose)">The Practice</span>
+      <h2>How the work comes to be</h2>
+      <p style="margin-bottom:1.5rem;">Hugh's process is slow and considered — he often spends weeks on a single piece, layering washes until the canvas feels alive. He works from observation as much as from intuition.</p>
+      <p>His studio is a converted boathouse overlooking Puget Sound, surrounded by wild roses, foxglove, and ancient rhododendrons. The garden feeds directly into the work.</p>
+    </div>
+
+    <div class="process-steps">
+      <div class="process-step">
+        <span class="step-num">01</span>
+        <div class="step-content">
+          <h4>Observing</h4>
+          <p>Mornings in the garden or on long walks — sketching, taking notes on light and colour with a small watercolour kit.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <span class="step-num">02</span>
+        <div class="step-content">
+          <h4>First Wash</h4>
+          <p>Laying broad, wet-on-wet washes to establish the mood and major colour relationships. This stage must be spontaneous.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <span class="step-num">03</span>
+        <div class="step-content">
+          <h4>Building Layers</h4>
+          <p>Glazing transparent layers over weeks, deepening shadow and lifting light. Patience is the main tool.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <span class="step-num">04</span>
+        <div class="step-content">
+          <h4>Knowing When to Stop</h4>
+          <p>The hardest part. Overworked watercolour loses its luminosity. Hugh stops before the painting feels 'finished.'</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MATERIALS -->
+  <section class="materials-section">
+    <div class="fade-up">
+      <span class="section-label">Materials &amp; Methods</span>
+      <h2>Made with the finest tools</h2>
+    </div>
+    <div class="materials-grid">
+      <div class="material-card fade-up" style="background: linear-gradient(135deg, var(--blush), #fff0f0); transition-delay:0.05s">
+        <div class="material-icon">🎨</div>
+        <div class="material-name">Watercolour</div>
+        <p class="material-desc">Daniel Smith and Schmincke professional-grade pigments for maximum luminosity and lightfastness.</p>
+      </div>
+      <div class="material-card fade-up" style="background: linear-gradient(135deg, var(--lavender), #f0ecff); transition-delay:0.1s">
+        <div class="material-icon">📄</div>
+        <div class="material-name">Cotton Rag Paper</div>
+        <p class="material-desc">Arches 300gsm cold-press cotton paper — archival quality for originals that last a lifetime.</p>
+      </div>
+      <div class="material-card fade-up" style="background: linear-gradient(135deg, var(--mint), #eafaf4); transition-delay:0.15s">
+        <div class="material-icon">🖌</div>
+        <div class="material-name">Sable Brushes</div>
+        <p class="material-desc">Winsor & Newton Series 7 kolinsky sable — the gold standard for watercolour control and spring.</p>
+      </div>
+      <div class="material-card fade-up" style="background: linear-gradient(135deg, var(--butter), #fffaec); transition-delay:0.2s">
+        <div class="material-icon">✨</div>
+        <div class="material-name">Pastel & Mixed</div>
+        <p class="material-desc">Unison soft pastels and inks introduced in later layers for texture and luminous accents.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- STUDIO SECTION -->
+  <section style="padding-top:0;">
+    <div class="fade-up">
+      <span class="section-label">The Studio</span>
+      <h2>Where it happens</h2>
+    </div>
+    <div class="studio-grid fade-up" style="transition-delay:0.1s">
+      <div class="studio-cell">
+        <div class="img-placeholder" style="background: linear-gradient(160deg, #a8c5b0, #c5e4d8, #bfd9f0); height:100%;">
+          <span>Studio</span>
+        </div>
+      </div>
+      <div class="studio-cell">
+        <div class="img-placeholder" style="background: linear-gradient(135deg, #f2c9a0, #f7c5c0); height:100%;">
+          <span>At Work</span>
+        </div>
+      </div>
+      <div class="studio-cell">
+        <div class="img-placeholder" style="background: linear-gradient(135deg, #d5c9e8, #c4a8d8); height:100%;">
+          <span>Palette</span>
+        </div>
+      </div>
+      <div class="studio-cell">
+        <div class="img-placeholder" style="background: linear-gradient(135deg, #f5eac0, #f2c9a0); height:100%;">
+          <span>Detail</span>
+        </div>
+      </div>
+      <div class="studio-cell">
+        <div class="img-placeholder" style="background: linear-gradient(135deg, #bfd9f0, #c5e4d8); height:100%;">
+          <span>Garden</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">Hugh Phibbs</div>
+        <p class="footer-tagline">Original paintings and limited prints, made with care in the Pacific Northwest.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Get in Touch</h4>
+        <ul>
+          <li><a href="mailto:hello@hughphibbs.com">hello@hughphibbs.com</a></li>
+          <li><a href="contact.html">Commission a piece</a></li>
+          <li><a href="#">Instagram</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Hugh Phibbs. All rights reserved.</span>
+      <span>Handcrafted with love ♥</span>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
