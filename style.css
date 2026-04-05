@@ -166,6 +166,57 @@ nav {
   font-weight: 700;
 }
 
+/* Feather SVG icons (files in /icons) */
+.icon-img {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.icon-img--nav {
+  width: 1.15em;
+  height: 1.15em;
+}
+
+.icon-img--hero-star {
+  width: 0.88em;
+  height: 0.88em;
+}
+
+.icon-img--card {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.icon-img--material {
+  width: 2rem;
+  height: 2rem;
+}
+
+.icon-img--cart-empty {
+  width: 4rem;
+  height: 4rem;
+}
+
+.icon-img--badge {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.footer-love {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.icon-img--footer-love {
+  width: 0.95em;
+  height: 0.95em;
+  opacity: 0.7;
+  filter: brightness(0) invert(1);
+}
+
 /* Mobile nav toggle */
 .nav-toggle {
   display: none;

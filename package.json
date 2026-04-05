@@ -1,0 +1,15 @@
+{
+  "name": "hugh-gallery",
+  "private": true,
+  "scripts": {
+    "sync:public": "node scripts/sync-public.cjs",
+    "dev": "npm run sync:public && wrangler dev",
+    "deploy": "npm run sync:public && wrangler deploy",
+    "dev:pages": "wrangler pages dev . --port 8788",
+    "d1:migrate:local": "wrangler d1 migrations apply hugh-gallery --local",
+    "d1:migrate:remote": "wrangler d1 migrations apply hugh-gallery --remote"
+  },
+  "devDependencies": {
+    "wrangler": "^4.80.0"
+  }
+}

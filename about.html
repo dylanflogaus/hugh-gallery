@@ -189,8 +189,8 @@
     }
 
     .material-icon {
-      font-size: 2rem;
       margin-bottom: 0.75rem;
+      line-height: 0;
     }
 
     .material-name {
@@ -255,7 +255,7 @@
     </ul>
     <div style="display:flex;align-items:center;gap:1rem;">
       <button class="nav-cart-btn" onclick="window.location='cart.html'">
-        🛒 Cart <span class="cart-count">0</span>
+        <img src="icons/shopping-cart.svg" alt="" class="icon-img icon-img--nav" width="18" height="18" /> Cart <span class="cart-count">0</span>
       </button>
       <button class="nav-toggle" aria-label="Toggle menu">
         <span></span><span></span><span></span>
@@ -339,22 +339,22 @@
     </div>
     <div class="materials-grid">
       <div class="material-card fade-up" style="background: linear-gradient(135deg, var(--blush), #fff0f0); transition-delay:0.05s">
-        <div class="material-icon">🎨</div>
+        <div class="material-icon"><img src="icons/droplet.svg" alt="" class="icon-img icon-img--material" width="32" height="32" /></div>
         <div class="material-name">Watercolour</div>
         <p class="material-desc">Daniel Smith and Schmincke professional-grade pigments for maximum luminosity and lightfastness.</p>
       </div>
       <div class="material-card fade-up" style="background: linear-gradient(135deg, var(--lavender), #f0ecff); transition-delay:0.1s">
-        <div class="material-icon">📄</div>
+        <div class="material-icon"><img src="icons/file-text.svg" alt="" class="icon-img icon-img--material" width="32" height="32" /></div>
         <div class="material-name">Cotton Rag Paper</div>
         <p class="material-desc">Arches 300gsm cold-press cotton paper — archival quality for originals that last a lifetime.</p>
       </div>
       <div class="material-card fade-up" style="background: linear-gradient(135deg, var(--mint), #eafaf4); transition-delay:0.15s">
-        <div class="material-icon">🖌</div>
+        <div class="material-icon"><img src="icons/pen-tool.svg" alt="" class="icon-img icon-img--material" width="32" height="32" /></div>
         <div class="material-name">Sable Brushes</div>
         <p class="material-desc">Winsor & Newton Series 7 kolinsky sable — the gold standard for watercolour control and spring.</p>
       </div>
       <div class="material-card fade-up" style="background: linear-gradient(135deg, var(--butter), #fffaec); transition-delay:0.2s">
-        <div class="material-icon">✨</div>
+        <div class="material-icon"><img src="icons/zap.svg" alt="" class="icon-img icon-img--material" width="32" height="32" /></div>
         <div class="material-name">Pastel & Mixed</div>
         <p class="material-desc">Unison soft pastels and inks introduced in later layers for texture and luminous accents.</p>
       </div>
@@ -423,7 +423,7 @@
     </div>
     <div class="footer-bottom">
       <span>© 2025 Hugh Phibbs. All rights reserved.</span>
-      <span>Handcrafted with love ♥</span>
+      <span class="footer-love">Handcrafted with love <img src="icons/heart.svg" alt="" class="icon-img icon-img--footer-love" width="14" height="14" /></span>
     </div>
   </footer>
 

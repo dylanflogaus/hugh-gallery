@@ -147,8 +147,8 @@
     }
 
     .info-card-icon {
-      font-size: 1.8rem;
       margin-bottom: 0.75rem;
+      line-height: 0;
     }
 
     .info-card h3 {
@@ -238,7 +238,7 @@
     </ul>
     <div style="display:flex;align-items:center;gap:1rem;">
       <button class="nav-cart-btn" onclick="window.location='cart.html'">
-        🛒 Cart <span class="cart-count">0</span>
+        <img src="icons/shopping-cart.svg" alt="" class="icon-img icon-img--nav" width="18" height="18" /> Cart <span class="cart-count">0</span>
       </button>
       <button class="nav-toggle" aria-label="Toggle menu">
         <span></span><span></span><span></span>
@@ -312,20 +312,20 @@
       <div class="contact-sidebar">
 
         <div class="info-card fade-up" style="background:linear-gradient(135deg,var(--blush),#fff5f5); transition-delay:0.1s">
-          <div class="info-card-icon">✉️</div>
+          <div class="info-card-icon"><img src="icons/mail.svg" alt="" class="icon-img icon-img--card" width="28" height="28" /></div>
           <h3>Email Directly</h3>
           <p>For a quicker response, send Hugh a direct message.</p>
           <a href="mailto:hello@hughphibbs.com">hello@hughphibbs.com</a>
         </div>
 
         <div class="info-card fade-up" style="background:linear-gradient(135deg,var(--mint),#edfaf4); transition-delay:0.15s">
-          <div class="info-card-icon">📦</div>
+          <div class="info-card-icon"><img src="icons/package.svg" alt="" class="icon-img icon-img--card" width="28" height="28" /></div>
           <h3>Shipping &amp; Delivery</h3>
           <p>Originals are carefully packed and shipped worldwide. All orders include tracking and insurance. Allow 5–10 days for delivery.</p>
         </div>
 
         <div class="info-card fade-up" style="background:linear-gradient(135deg,var(--lavender),#f5f0ff); transition-delay:0.2s">
-          <div class="info-card-icon">📸</div>
+          <div class="info-card-icon"><img src="icons/camera.svg" alt="" class="icon-img icon-img--card" width="28" height="28" /></div>
           <h3>Follow the Work</h3>
           <p>Catch behind-the-scenes studio moments and works-in-progress on Instagram.</p>
           <a href="#">@hughphibbs</a>
@@ -374,7 +374,7 @@
     </div>
     <div class="footer-bottom">
       <span>© 2025 Hugh Phibbs. All rights reserved.</span>
-      <span>Handcrafted with love ♥</span>
+      <span class="footer-love">Handcrafted with love <img src="icons/heart.svg" alt="" class="icon-img icon-img--footer-love" width="14" height="14" /></span>
     </div>
   </footer>
 

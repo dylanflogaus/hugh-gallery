@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Gallery Admin — Hugh Phibbs</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .admin-body {
+      min-height: 100vh;
+      padding: calc(var(--nav-h) + 2rem) 5vw 4rem;
+    }
+    .admin-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .admin-header h1 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      margin-bottom: 0.25rem;
+    }
+    .admin-header .sub {
+      color: var(--warm-grey);
+      font-size: 0.95rem;
+      max-width: 40ch;
+    }
+    .admin-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+    }
+    .admin-toolbar button,
+    .admin-toolbar a.btn-link {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      border: 1.5px solid rgba(58,46,46,0.2);
+      background: var(--white);
+      cursor: pointer;
+      color: var(--ink);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .admin-toolbar button:hover,
+    .admin-toolbar a.btn-link:hover {
+      background: var(--blush);
+      border-color: var(--rose);
+    }
+    .admin-toolbar .primary {
+      background: var(--ink);
+      color: var(--cream);
+      border-color: var(--ink);
+    }
+    .admin-toolbar .primary:hover {
+      background: #2a2222;
+      border-color: #2a2222;
+    }
+    .admin-toolbar .danger {
+      border-color: rgba(138, 48, 64, 0.45);
+      color: #6b2a32;
+    }
+    a.btn-link {
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    #login-screen {
+      max-width: 400px;
+      margin: 10vh auto;
+      padding: 2.5rem;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 40px rgba(58,46,46,0.08);
+    }
+    #login-screen h1 { margin-bottom: 0.5rem; font-size: 1.75rem; }
+    #login-screen label { display: block; font-size: 0.8rem; font-weight: 500; margin: 1.25rem 0 0.4rem; color: var(--warm-grey); }
+    #login-screen input[type="password"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid rgba(58,46,46,0.15);
+      border-radius: 10px;
+      font: inherit;
+    }
+    #login-screen button {
+      margin-top: 1.25rem;
+      width: 100%;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 10px;
+      background: var(--ink);
+      color: var(--cream);
+      font-weight: 500;
+      cursor: pointer;
+    }
+    #login-error {
+      margin-top: 1rem;
+      color: #8a3040;
+      font-size: 0.9rem;
+    }
+
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 1fr minmax(320px, 420px);
+      gap: 2rem;
+      align-items: start;
+    }
+    @media (max-width: 960px) {
+      .admin-layout { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 24px rgba(58,46,46,0.06);
+      overflow: hidden;
+    }
+    .panel-head {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(58,46,46,0.08);
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+    }
+
+    .admin-table-wrap {
+      overflow-x: auto;
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .admin-table th,
+    .admin-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(58,46,46,0.06);
+      vertical-align: middle;
+    }
+    .admin-table th {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--warm-grey);
+      font-weight: 500;
+    }
+    .admin-table .muted { color: var(--warm-grey); font-size: 0.82rem; }
+    .admin-table code {
+      font-size: 0.75rem;
+      color: var(--warm-grey);
+      word-break: break-all;
+    }
+    .thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+      display: block;
+    }
+    .thumb-gradient {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+    }
+    .row-actions {
+      white-space: nowrap;
+    }
+    .btn-sm {
+      font-size: 0.75rem;
+      padding: 0.35rem 0.65rem;
+      margin: 0 0.15rem;
+      border-radius: 8px;
+      border: 1px solid rgba(58,46,46,0.18);
+      background: var(--cream);
+      cursor: pointer;
+    }
+    .btn-sm.danger {
+      border-color: rgba(138, 48, 64, 0.35);
+      color: #6b2a32;
+    }
+    .btn-icon {
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      border-radius: 8px;
+      border: 1px solid rgba(58,46,46,0.12);
+      background: var(--cream);
+      cursor: pointer;
+      font-size: 0.9rem;
+      line-height: 1;
+      vertical-align: middle;
+      margin-right: 0.2rem;
+    }
+    .tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 6px;
+      margin-left: 0.35rem;
+      vertical-align: middle;
+    }
+    .tag-sold { background: rgba(58,46,46,0.12); color: var(--ink); }
+
+    #field-panel .panel-body { padding: 1.25rem; }
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem 1rem;
+    }
+    @media (max-width: 520px) {
+      .field-grid { grid-template-columns: 1fr; }
+    }
+    .field-grid label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--warm-grey);
+      margin-bottom: 0.35rem;
+    }
+    .field-grid input,
+    .field-grid select,
+    .field-grid textarea {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      border: 1.5px solid rgba(58,46,46,0.12);
+      border-radius: 10px;
+      font: inherit;
+      background: var(--cream);
+    }
+    .field-grid textarea { min-height: 72px; resize: vertical; }
+    .field-grid .full { grid-column: 1 / -1; }
+    .checks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+    .checks label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .form-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 1.25rem;
+    }
+    .form-actions button {
+      font-family: var(--font-body);
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .form-actions .submit {
+      background: var(--ink);
+      color: var(--cream);
+    }
+    .form-actions .ghost {
+      background: transparent;
+      border: 1.5px solid rgba(58,46,46,0.2);
+      color: var(--ink);
+    }
+
+    #status-toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      padding: 0.75rem 1.25rem;
+      background: var(--ink);
+      color: var(--cream);
+      border-radius: 12px;
+      font-size: 0.88rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 300;
+    }
+    #status-toast.show { opacity: 1; }
+
+    #import-file { display: none; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-logo">Hugh <span>Phibbs</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="admin.html" class="active">Admin</a></li>
+    </ul>
+    <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  </nav>
+
+  <div class="admin-body">
+    <div id="login-screen">
+      <h1>Gallery admin</h1>
+      <p class="sub">Use the same value as your Cloudflare <strong>ADMIN_API_SECRET</strong> (Pages secret / <code>.dev.vars</code> locally).</p>
+      <form id="login-form">
+        <label for="login-password">Admin API secret</label>
+        <input id="login-password" type="password" autocomplete="current-password" required />
+        <button type="submit">Sign in</button>
+        <p id="login-error" hidden>Could not verify. Check the secret, D1 binding, and that <code>/api/admin/verify</code> is deployed.</p>
+      </form>
+    </div>
+
+    <div id="admin-app" hidden>
+      <header class="admin-header">
+        <div>
+          <span class="section-label">Dashboard</span>
+          <h1>Manage gallery</h1>
+          <p class="sub">Edits are written to your <strong>Cloudflare D1</strong> database via <code>/api/gallery</code>. Export JSON is for backup only.</p>
+        </div>
+        <div class="admin-toolbar">
+          <button type="button" class="primary" id="btn-preview">Open gallery</button>
+          <button type="button" id="btn-export">Export JSON</button>
+          <button type="button" id="btn-import">Import JSON</button>
+          <button type="button" class="danger" id="btn-reset">Reset defaults</button>
+          <button type="button" id="btn-logout">Log out</button>
+          <a href="index.html" class="btn-link">Site home</a>
+        </div>
+      </header>
+
+      <div class="admin-layout">
+        <div class="panel">
+          <div class="panel-head">All pieces (order = gallery order)</div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Title / ID</th>
+                  <th>Price</th>
+                  <th>Tags</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="item-list"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel" id="field-panel">
+          <div class="panel-head" id="form-title-text">New piece</div>
+          <div class="panel-body">
+            <form id="piece-form">
+              <input type="hidden" id="form-editing-id" value="" />
+              <div class="field-grid">
+                <div>
+                  <label for="field-id">URL slug (unique)</label>
+                  <input id="field-id" placeholder="e.g. garden-reverie" />
+                </div>
+                <div>
+                  <label for="field-title">Title</label>
+                  <input id="field-title" required placeholder="Piece title" />
+                </div>
+                <div class="full">
+                  <label for="field-meta">Subtitle / materials (card line)</label>
+                  <input id="field-meta" placeholder="Watercolour · 40×50 cm · 2025" />
+                </div>
+                <div class="full">
+                  <label for="field-desc">Short description (gallery card)</label>
+                  <textarea id="field-desc" placeholder="One or two sentences."></textarea>
+                </div>
+                <div class="full">
+                  <label for="field-detail">Long description (quick view modal)</label>
+                  <textarea id="field-detail" placeholder="Optional; defaults to short description."></textarea>
+                </div>
+                <div>
+                  <label for="field-label">Modal label</label>
+                  <input id="field-label" placeholder="Original · 2025" />
+                </div>
+                <div>
+                  <label for="field-price">Price (USD)</label>
+                  <input id="field-price" type="number" min="0" step="1" required />
+                </div>
+                <div class="full">
+                  <label for="field-cart-title">Cart product name</label>
+                  <input id="field-cart-title" placeholder="Defaults to title; use for &quot;(Print)&quot; etc." />
+                </div>
+                <div class="full">
+                  <label for="field-gradient">Placeholder CSS background</label>
+                  <textarea id="field-gradient" rows="2" placeholder="linear-gradient(145deg, #f7c5c0, #d5c9e8)"></textarea>
+                </div>
+                <div>
+                  <label for="field-cart-color">Cart swatch (hex)</label>
+                  <input id="field-cart-color" type="text" placeholder="#d5c9e8" />
+                </div>
+                <div>
+                  <label for="field-tags">Filter tags (space-separated)</label>
+                  <input id="field-tags" placeholder="original watercolour floral" />
+                </div>
+                <div>
+                  <label for="field-badge">Badge</label>
+                  <select id="field-badge">
+                    <option value="">None</option>
+                    <option value="new">New</option>
+                    <option value="print">Print</option>
+                    <option value="last">1 Left</option>
+                    <option value="sold">Sold</option>
+                  </select>
+                </div>
+                <div class="full">
+                  <label for="field-image-url">Image URL (optional)</label>
+                  <input id="field-image-url" type="url" placeholder="https://…" />
+                </div>
+                <div class="checks full">
+                  <label><input type="checkbox" id="field-large" /> Large wide card</label>
+                  <label><input type="checkbox" id="field-featured" /> Featured on home (max 3 shown)</label>
+                  <label><input type="checkbox" id="field-sold" /> Sold (no cart / quick view)</label>
+                  <label><input type="checkbox" id="field-image-dimmed" /> Dim image / placeholder</label>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="submit">Save piece</button>
+                <button type="button" class="ghost" id="btn-cancel-edit">Clear form</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="status-toast" role="status" aria-live="polite"></div>
+  <input type="file" id="import-file" accept="application/json,.json" />
+
+  <script src="gallery-store.js"></script>
+  <script src="main.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
