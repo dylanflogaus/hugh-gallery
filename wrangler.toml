@@ -3,15 +3,12 @@
 # Worker (your case — *.workers.dev):
 #   1) npx wrangler d1 create hugh-gallery  (if needed)
 #   2) Set database_id below; run: npx wrangler d1 migrations apply hugh-gallery --remote
-#   3) Secret (Worker, not Pages):
+#   3) Secret:
 #        npx wrangler secret put ADMIN_API_SECRET
 #      Paste a long random string; use the same value when logging into /admin.html
 #   4) Deploy (copies HTML/CSS/JS/icons into public/, then uploads Worker + assets):
 #        npm run deploy
 #   5) Local: cp .dev.vars.example .dev.vars && npx wrangler d1 migrations apply hugh-gallery --local && npm run dev
-#
-# Cloudflare Pages instead: use pages_build_output_dir + functions/ and drop [assets]/main;
-# see Cloudflare docs for hybrid setups.
 #
 name = "hugh-gallery"
 main = "src/worker.js"

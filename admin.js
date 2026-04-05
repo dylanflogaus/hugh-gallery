@@ -1,5 +1,5 @@
 /**
- * Gallery admin — uses Cloudflare Pages API + D1. Login is the ADMIN_API_SECRET value.
+ * Gallery admin — calls Worker /api/* + D1. Login uses ADMIN_API_SECRET (wrangler secret).
  */
 (function () {
   const SESSION_KEY = 'hugh_admin_token';

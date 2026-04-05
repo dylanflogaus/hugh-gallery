@@ -1,6 +1,5 @@
 /**
  * Cloudflare Worker: static assets + /api/gallery + /api/admin/verify
- * (Pages projects can keep using functions/ instead.)
  */
 function adminOk(request, env) {
   const secret = env.ADMIN_API_SECRET;

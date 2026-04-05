@@ -1,6 +1,6 @@
 /**
  * Shared gallery data: defaults + localStorage override (set from Admin).
- * Pages call HughGallery.load() for the active list.
+ * Client bundles call HughGallery.load() / loadAsync() for the active list.
  */
 (function () {
   const STORAGE_KEY = 'hugh_gallery_items';
