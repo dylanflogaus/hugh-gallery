@@ -53,13 +53,18 @@ function updateCartCount() {
   });
 }
 
-function addToCart(id, title, price, color) {
+function addToCart(id, title, price, color, imageUrl) {
   const cart = getCart();
   const existing = cart.find(item => item.id === id);
+  const img =
+    imageUrl != null && String(imageUrl).trim() ? String(imageUrl).trim() : '';
   if (existing) {
     existing.qty += 1;
+    if (img && !existing.imageUrl) existing.imageUrl = img;
   } else {
-    cart.push({ id, title, price, color, qty: 1 });
+    const line = { id, title, price, color, qty: 1 };
+    if (img) line.imageUrl = img;
+    cart.push(line);
   }
   saveCart(cart);
   updateCartCount();

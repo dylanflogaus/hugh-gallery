@@ -53,7 +53,9 @@
       if (!btn) return;
       const id = btn.getAttribute('data-home-add');
       const item = HughGallery.load().find((x) => x.id === id);
-      if (item && !item.sold) addToCart(item.id, item.cartTitle, item.price, item.cartColor);
+      if (item && !item.sold) {
+        addToCart(item.id, item.cartTitle, item.price, item.cartColor, item.imageUrl);
+      }
     });
 
     const fadeObs = new IntersectionObserver(

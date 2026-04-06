@@ -78,6 +78,13 @@
       font-size: 0;
     }
 
+    .cart-item-thumb img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
     .cart-item-info {
       flex: 1;
     }
@@ -236,7 +243,19 @@
     }
 
     @media (max-width: 580px) {
-      .cart-item { grid-template-columns: 70px 1fr; }
+      /* Track width must match .cart-item-thumb — otherwise a 90px thumb overflows into the title column. */
+      .cart-item {
+        grid-template-columns: 80px 1fr;
+        column-gap: 1.5rem;
+        row-gap: 0.5rem;
+      }
+      .cart-item-thumb {
+        width: 80px;
+        height: 80px;
+      }
+      .cart-item-info {
+        min-width: 0;
+      }
       .cart-item-price { grid-column: 2; text-align: left; }
     }
   </style>
@@ -305,6 +324,7 @@
     </div>
   </footer>
 
+  <script src="gallery-store.js"></script>
   <script src="main.js"></script>
   <script>
     const COLORS = {
@@ -313,6 +333,7 @@
       'peach-blossom':  'linear-gradient(135deg,#f2c9a0,#f7c5c0,#e8a8b0)',
       'morning-mist':   'linear-gradient(160deg,#c5e4d8,#bfd9f0,#f5eac0)',
       'reverie-4':      'linear-gradient(125deg,#c4a8d8,#f7c5c0,#f5eac0)',
+      'wild-meadow':    'linear-gradient(140deg,#a8c5b0,#c5e4d8,#bfd9f0)',
       'warm-study':     'linear-gradient(170deg,#f5eac0,#f2c9a0,#e8a8b0)',
       'spectrum':       'linear-gradient(115deg,#d5c9e8,#bfd9f0,#c5e4d8,#f7c5c0)',
       'rose-study':     'linear-gradient(150deg,#e8a8b0,#f7c5c0,#c4a8d8)',
@@ -320,6 +341,32 @@
       'first-light':    'linear-gradient(145deg,#c5e4d8,#bfd9f0,#f5eac0)',
       'bloom-3':        'linear-gradient(145deg,#f2c9a0,#f7c5c0,#c4a8d8)',
     };
+
+    function escapeHtml(s) {
+      const div = document.createElement('div');
+      div.textContent = s;
+      return div.innerHTML;
+    }
+
+    function placeholderGradient(item) {
+      const preset = COLORS[item.id];
+      if (preset) return preset;
+      const c = item.color && String(item.color).trim();
+      if (c && /^#[\da-f]{3,8}$/i.test(c)) {
+        return `linear-gradient(135deg,${c},${c})`;
+      }
+      return 'linear-gradient(135deg, #f7c5c0, #d5c9e8)';
+    }
+
+    function cartItemImageUrl(item) {
+      let u = item.imageUrl && String(item.imageUrl).trim();
+      if (u) return u;
+      if (window.HughGallery) {
+        const g = HughGallery.load().find((i) => i.id === item.id);
+        if (g && g.imageUrl) return g.imageUrl;
+      }
+      return '';
+    }
 
     function formatPrice(n) {
       return '$' + n.toLocaleString('en-US');
@@ -346,11 +393,14 @@
       const total = subtotal + shipping;
 
       const itemsHTML = cart.map(item => {
-        const bg = COLORS[item.id] || 'linear-gradient(135deg, #f7c5c0, #d5c9e8)';
+        const imgUrl = cartItemImageUrl(item);
+        const thumbInner = imgUrl
+          ? `<img src="${escapeHtml(imgUrl)}" alt="" />`
+          : `<div class="img-placeholder" style="background:${placeholderGradient(item)};height:100%;aspect-ratio:unset;"></div>`;
         return `
           <div class="cart-item" id="item-${item.id}">
             <div class="cart-item-thumb">
-              <div class="img-placeholder" style="background:${bg};height:100%;aspect-ratio:unset;"></div>
+              ${thumbInner}
             </div>
             <div class="cart-item-info">
               <div class="cart-item-title">${item.title}</div>
@@ -470,7 +520,14 @@
       history.replaceState({}, '', path);
     })();
 
-    renderCart();
+    (async function initCartPage() {
+      if (window.HughGallery && typeof HughGallery.loadAsync === 'function') {
+        try {
+          await HughGallery.loadAsync();
+        } catch (_) {}
+      }
+      renderCart();
+    })();
   </script>
 </body>
 </html>

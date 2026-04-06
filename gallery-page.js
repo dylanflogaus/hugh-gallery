@@ -98,7 +98,8 @@
       const full = HughGallery.load().find((i) => i.id === id);
       const cTitle = full ? full.cartTitle : art.title;
       const cColor = full ? full.cartColor : '';
-      addToCart(art.id, cTitle, art.numPrice, cColor);
+      const cImg = full && full.imageUrl ? full.imageUrl : '';
+      addToCart(art.id, cTitle, art.numPrice, cColor, cImg);
       closeModal();
     };
     addBtn.disabled = false;
@@ -142,7 +143,7 @@
         const id = cartBtn.getAttribute('data-add-cart');
         const item = items.find((i) => i.id === id);
         if (item && !item.sold) {
-          addToCart(item.id, item.cartTitle, item.price, item.cartColor);
+          addToCart(item.id, item.cartTitle, item.price, item.cartColor, item.imageUrl);
         }
       }
     });
