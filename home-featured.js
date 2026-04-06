@@ -37,13 +37,16 @@
     if (!grid || !window.HughGallery) return;
 
     const all = await HughGallery.loadAsync();
-    const featured = all.filter((i) => i.featured).slice(0, 3);
-    if (!featured.length) {
+    const featured = all.filter((i) => i.featured);
+    const featuredWithImages = featured.filter((i) => !!i.imageUrl);
+    const fallbackWithImages = all.filter((i) => !!i.imageUrl && !featured.some((f) => f.id === i.id));
+    const displayItems = featuredWithImages.concat(fallbackWithImages).slice(0, 3);
+    if (!displayItems.length) {
       grid.innerHTML = '<p class="fade-up">No featured works yet. Mark items as featured in the admin dashboard.</p>';
       return;
     }
 
-    grid.innerHTML = featured.map((item, i) => buildCard(item, i)).join('');
+    grid.innerHTML = displayItems.map((item, i) => buildCard(item, i)).join('');
 
     grid.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-home-add]');

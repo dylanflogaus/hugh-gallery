@@ -6,6 +6,20 @@
   const STORAGE_KEY = 'hugh_gallery_items';
   const API_GALLERY = '/api/gallery';
   const API_TIMEOUT_MS = 2500;
+  const FALLBACK_IMAGE_BY_ID = Object.freeze({
+    'garden-reverie': '/artwork/web/flowers.webp',
+    drift: '/artwork/web/sea.webp',
+    'peach-blossom': '/artwork/web/flowers-abstract.webp',
+    'morning-mist': '/artwork/web/cloud.webp',
+    'reverie-4': '/artwork/web/abstract.webp',
+    'wild-meadow': '/artwork/web/plains.webp',
+    'warm-study': '/artwork/web/orange.webp',
+    spectrum: '/artwork/web/mosaic.webp',
+    'rose-study': '/artwork/web/more-flowers.webp',
+    'lavender-haze': '/artwork/web/blue.webp',
+    'first-light': '/artwork/web/scenic.webp',
+    'bloom-3': '/artwork/web/flowers-vase.webp',
+  });
 
   function formatMoney(n) {
     const num = Number(n);
@@ -36,6 +50,7 @@
         featured: false,
         sold: false,
         cartColor: '#d5c9e8',
+        imageUrl: '/artwork/web/flowers.webp',
       },
       {
         id: 'drift',
@@ -53,6 +68,7 @@
         featured: false,
         sold: false,
         cartColor: '#bfd9f0',
+        imageUrl: '/artwork/web/sea.webp',
       },
       {
         id: 'peach-blossom',
@@ -70,6 +86,7 @@
         featured: false,
         sold: false,
         cartColor: '#f2c9a0',
+        imageUrl: '/artwork/web/flowers-abstract.webp',
       },
       {
         id: 'morning-mist',
@@ -87,6 +104,7 @@
         featured: false,
         sold: false,
         cartColor: '#c5e4d8',
+        imageUrl: '/artwork/web/cloud.webp',
       },
       {
         id: 'reverie-4',
@@ -104,6 +122,7 @@
         featured: false,
         sold: false,
         cartColor: '#c4a8d8',
+        imageUrl: '/artwork/web/abstract.webp',
       },
       {
         id: 'wild-meadow',
@@ -121,6 +140,7 @@
         featured: false,
         sold: true,
         cartColor: '#a8c5b0',
+        imageUrl: '/artwork/web/plains.webp',
         imageDimmed: true,
       },
       {
@@ -139,6 +159,7 @@
         featured: false,
         sold: false,
         cartColor: '#f5eac0',
+        imageUrl: '/artwork/web/orange.webp',
       },
       {
         id: 'spectrum',
@@ -156,6 +177,7 @@
         featured: false,
         sold: false,
         cartColor: '#d5c9e8',
+        imageUrl: '/artwork/web/mosaic.webp',
       },
       {
         id: 'rose-study',
@@ -173,6 +195,7 @@
         featured: false,
         sold: false,
         cartColor: '#e8a8b0',
+        imageUrl: '/artwork/web/more-flowers.webp',
       },
       {
         id: 'lavender-haze',
@@ -190,6 +213,7 @@
         featured: true,
         sold: false,
         cartColor: '#d5c9e8',
+        imageUrl: '/artwork/web/blue.webp',
       },
       {
         id: 'first-light',
@@ -207,6 +231,7 @@
         featured: true,
         sold: false,
         cartColor: '#c5e4d8',
+        imageUrl: '/artwork/web/scenic.webp',
       },
       {
         id: 'bloom-3',
@@ -224,6 +249,7 @@
         featured: true,
         sold: false,
         cartColor: '#f2c9a0',
+        imageUrl: '/artwork/web/flowers-vase.webp',
       },
     ];
   }
@@ -231,6 +257,7 @@
   function normalizeItem(raw) {
     const d = getDefaultItems()[0];
     const id = String(raw.id || '').trim() || 'piece-' + Math.random().toString(36).slice(2, 9);
+    const fallbackImageUrl = FALLBACK_IMAGE_BY_ID[id] || '';
     return {
       id,
       title: String(raw.title ?? '').trim() || 'Untitled',
@@ -247,7 +274,7 @@
       featured: !!raw.featured,
       sold: !!raw.sold,
       cartColor: String(raw.cartColor ?? '#d5c9e8').trim(),
-      imageUrl: raw.imageUrl ? String(raw.imageUrl).trim() : '',
+      imageUrl: raw.imageUrl ? String(raw.imageUrl).trim() : fallbackImageUrl,
       imageDimmed: !!raw.imageDimmed,
     };
   }
