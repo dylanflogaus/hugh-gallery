@@ -9,6 +9,16 @@
     last: 'badge-last',
   };
 
+  const BADGE_LABELS = { new: 'New', sold: 'Sold', print: 'Print', last: '1 Left' };
+
+  function formatBadgeLabel(key) {
+    return key
+      .split(/[\s-]+/)
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+  }
+
   function escapeHtml(s) {
     const div = document.createElement('div');
     div.textContent = s;
@@ -28,9 +38,10 @@
     const delay = ` style="transition-delay:${(index % 5) * 0.05}s"`;
     const tags = escapeHtml(item.tags);
     let badgeHtml = '';
-    if (item.badge && BADGE_CLASS[item.badge]) {
-      const labels = { new: 'New', sold: 'Sold', print: 'Print', last: '1 Left' };
-      badgeHtml = `<span class="badge ${BADGE_CLASS[item.badge]}">${labels[item.badge] || item.badge}</span>`;
+    if (item.badge) {
+      const badgeClass = BADGE_CLASS[item.badge] || 'badge-custom';
+      const text = BADGE_LABELS[item.badge] || formatBadgeLabel(item.badge);
+      badgeHtml = `<span class="badge ${badgeClass}">${escapeHtml(text)}</span>`;
     }
 
     const overlayHtml = item.sold

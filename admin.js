@@ -3,8 +3,117 @@
  */
 (function () {
   const SESSION_KEY = 'hugh_admin_token';
+  /** Badge values handled by the preset dropdown (empty = none). */
+  const PRESET_BADGE_KEYS = new Set(['', 'new', 'print', 'last', 'sold']);
 
   const $ = (sel, el = document) => el.querySelector(sel);
+
+  const FIELD_TIP_MARGIN = 12;
+  const FIELD_TIP_GAP = 8;
+
+  let fieldTooltipEl = null;
+  /** @type {HTMLElement | null} */
+  let fieldTooltipForBtn = null;
+  let fieldTipsRepositionScheduled = false;
+
+  function getFieldTooltipEl() {
+    if (!fieldTooltipEl) {
+      fieldTooltipEl = document.createElement('div');
+      fieldTooltipEl.id = 'field-info-tooltip';
+      fieldTooltipEl.className = 'field-info-tooltip';
+      fieldTooltipEl.setAttribute('role', 'tooltip');
+      document.body.appendChild(fieldTooltipEl);
+    }
+    return fieldTooltipEl;
+  }
+
+  function hideFieldTooltip() {
+    if (fieldTooltipEl) {
+      fieldTooltipEl.classList.remove('is-visible');
+      fieldTooltipEl.textContent = '';
+    }
+    if (fieldTooltipForBtn) {
+      fieldTooltipForBtn.removeAttribute('aria-describedby');
+      fieldTooltipForBtn = null;
+    }
+  }
+
+  function positionFieldInfoTip(btn) {
+    if (!btn || !btn.classList.contains('field-info')) return;
+    const text = btn.getAttribute('data-tooltip') || '';
+    if (!text) {
+      hideFieldTooltip();
+      return;
+    }
+    const el = getFieldTooltipEl();
+    el.textContent = text;
+    el.classList.remove('is-visible');
+    el.style.left = '-9999px';
+    el.style.top = '0px';
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    const rect = btn.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const m = FIELD_TIP_MARGIN;
+    const gap = FIELD_TIP_GAP;
+
+    let left = rect.left + rect.width / 2 - w / 2;
+    const maxLeft = Math.max(m, vw - m - w);
+    left = Math.min(Math.max(left, m), maxLeft);
+
+    let top = rect.top - gap - h;
+    if (top < m) {
+      top = rect.bottom + gap;
+    }
+    if (top + h > vh - m) {
+      top = vh - m - h;
+    }
+    if (top < m) {
+      top = m;
+    }
+
+    el.style.left = `${Math.round(left)}px`;
+    el.style.top = `${Math.round(top)}px`;
+    if (fieldTooltipForBtn && fieldTooltipForBtn !== btn) {
+      fieldTooltipForBtn.removeAttribute('aria-describedby');
+    }
+    fieldTooltipForBtn = btn;
+    btn.setAttribute('aria-describedby', 'field-info-tooltip');
+    el.classList.add('is-visible');
+  }
+
+  function clearFieldInfoTip(btn) {
+    if (fieldTooltipForBtn !== btn) return;
+    hideFieldTooltip();
+  }
+
+  function scheduleRepositionFieldTips() {
+    if (fieldTipsRepositionScheduled) return;
+    fieldTipsRepositionScheduled = true;
+    requestAnimationFrame(() => {
+      fieldTipsRepositionScheduled = false;
+      if (
+        fieldTooltipForBtn &&
+        fieldTooltipEl &&
+        fieldTooltipEl.classList.contains('is-visible') &&
+        (fieldTooltipForBtn.matches(':hover') || document.activeElement === fieldTooltipForBtn)
+      ) {
+        positionFieldInfoTip(fieldTooltipForBtn);
+      }
+    });
+  }
+
+  function setupFieldInfoTips() {
+    document.querySelectorAll('.field-info').forEach((btn) => {
+      btn.addEventListener('mouseenter', () => positionFieldInfoTip(btn));
+      btn.addEventListener('mouseleave', () => clearFieldInfoTip(btn));
+      btn.addEventListener('focus', () => positionFieldInfoTip(btn));
+      btn.addEventListener('blur', () => clearFieldInfoTip(btn));
+    });
+    window.addEventListener('resize', scheduleRepositionFieldTips);
+    window.addEventListener('scroll', scheduleRepositionFieldTips, { capture: true, passive: true });
+  }
 
   function getToken() {
     return sessionStorage.getItem(SESSION_KEY) || '';
@@ -71,7 +180,11 @@
       cartTitle: $('#field-cart-title').value || $('#field-title').value,
       gradient: $('#field-gradient').value,
       tags: $('#field-tags').value,
-      badge: $('#field-badge').value,
+      badge: (() => {
+        const custom = $('#field-badge-custom').value.trim();
+        if (custom) return custom;
+        return $('#field-badge').value;
+      })(),
       large: $('#field-large').checked,
       featured: $('#field-featured').checked,
       sold: $('#field-sold').checked,
@@ -94,13 +207,22 @@
     $('#field-cart-title').value = item.cartTitle;
     $('#field-gradient').value = item.gradient;
     $('#field-tags').value = item.tags;
-    $('#field-badge').value = item.badge || '';
+    const b = item.badge || '';
+    if (PRESET_BADGE_KEYS.has(b)) {
+      $('#field-badge').value = b;
+      $('#field-badge-custom').value = '';
+    } else {
+      $('#field-badge').value = '';
+      $('#field-badge-custom').value = b;
+    }
     $('#field-large').checked = item.large;
     $('#field-featured').checked = item.featured;
     $('#field-sold').checked = item.sold;
     $('#field-cart-color').value = item.cartColor;
     $('#field-image-url').value = item.imageUrl || '';
     $('#field-image-dimmed').checked = item.imageDimmed;
+    refreshImagePreview();
+    setImageUploadStatus('');
   }
 
   function clearForm() {
@@ -118,6 +240,7 @@
     $('#field-gradient').value = b.gradient;
     $('#field-tags').value = b.tags;
     $('#field-badge').value = '';
+    $('#field-badge-custom').value = '';
     $('#field-large').checked = false;
     $('#field-featured').checked = false;
     $('#field-sold').checked = false;
@@ -125,6 +248,8 @@
     $('#field-image-url').value = '';
     $('#field-image-dimmed').checked = false;
     $('#form-title-text').textContent = 'New piece';
+    refreshImagePreview();
+    setImageUploadStatus('');
   }
 
   function renderList() {
@@ -225,6 +350,107 @@
     showStatus._t = setTimeout(() => el.classList.remove('show'), 2400);
   }
 
+  function setImageUploadStatus(msg) {
+    const el = $('#image-upload-status');
+    if (el) el.textContent = msg || '';
+  }
+
+  function refreshImagePreview() {
+    const field = $('#field-image-url');
+    const wrap = $('#image-preview-wrap');
+    const img = $('#image-preview');
+    if (!field || !wrap || !img) return;
+    const url = (field.value || '').trim();
+    if (url) {
+      img.src = url;
+      wrap.hidden = false;
+    } else {
+      img.removeAttribute('src');
+      wrap.hidden = true;
+    }
+  }
+
+  const MAX_LONG_EDGE = 1800;
+  const WEBP_QUALITY = 0.76;
+  const JPEG_QUALITY = 0.82;
+
+  async function optimizeImageForWeb(file) {
+    let bitmap;
+    try {
+      bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    } catch (_) {
+      try {
+        bitmap = await createImageBitmap(file);
+      } catch {
+        throw new Error('Could not read this image. Try another file or format.');
+      }
+    }
+    try {
+      let w = bitmap.width;
+      let h = bitmap.height;
+      const long = Math.max(w, h);
+      if (long > MAX_LONG_EDGE) {
+        const s = MAX_LONG_EDGE / long;
+        w = Math.max(1, Math.round(w * s));
+        h = Math.max(1, Math.round(h * s));
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Could not prepare image canvas.');
+      ctx.drawImage(bitmap, 0, 0, w, h);
+
+      const webpBlob = await new Promise((resolve) => {
+        canvas.toBlob((b) => resolve(b), 'image/webp', WEBP_QUALITY);
+      });
+      if (webpBlob && webpBlob.size > 0) return webpBlob;
+
+      const jpegBlob = await new Promise((resolve, reject) => {
+        canvas.toBlob(
+          (b) => {
+            if (b && b.size > 0) resolve(b);
+            else reject(new Error('Could not encode image (try a different browser).'));
+          },
+          'image/jpeg',
+          JPEG_QUALITY
+        );
+      });
+      return jpegBlob;
+    } finally {
+      bitmap.close();
+    }
+  }
+
+  async function uploadOptimizedImage(blob) {
+    const token = getToken();
+    if (!token.trim()) throw new Error('Admin session missing. Log in again.');
+    const ext = blob.type && blob.type.includes('jpeg') ? 'jpg' : 'webp';
+    const fd = new FormData();
+    fd.append('file', blob, 'gallery.' + ext);
+    const r = await fetch('/api/admin/upload-image', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token.trim() },
+      body: fd,
+    });
+    if (!r.ok) {
+      let msg = 'Upload failed (' + r.status + ')';
+      try {
+        const j = await r.json();
+        if (j && j.error) msg = j.error;
+      } catch {
+        try {
+          const t = await r.text();
+          if (t) msg = t;
+        } catch (_) {}
+      }
+      throw new Error(msg);
+    }
+    const data = await r.json();
+    if (!data.url) throw new Error('Invalid response from server');
+    return data.url;
+  }
+
   async function showApp() {
     $('#login-screen').hidden = true;
     $('#admin-app').hidden = false;
@@ -242,6 +468,8 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    setupFieldInfoTips();
+
     $('#login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const token = $('#login-password').value.trim();
@@ -282,6 +510,40 @@
     });
 
     $('#btn-cancel-edit').addEventListener('click', () => clearForm());
+
+    $('#btn-pick-image').addEventListener('click', () => {
+      $('#field-image-file').click();
+    });
+
+    $('#btn-clear-image').addEventListener('click', () => {
+      $('#field-image-url').value = '';
+      refreshImagePreview();
+      setImageUploadStatus('');
+    });
+
+    $('#field-image-file').addEventListener('change', async (e) => {
+      const input = e.target;
+      const file = input.files && input.files[0];
+      input.value = '';
+      if (!file) return;
+      if (file.type && !file.type.startsWith('image/')) {
+        alert('Please choose an image file.');
+        return;
+      }
+      setImageUploadStatus('Optimizing…');
+      try {
+        const blob = await optimizeImageForWeb(file);
+        setImageUploadStatus('Uploading…');
+        const url = await uploadOptimizedImage(blob);
+        $('#field-image-url').value = url;
+        refreshImagePreview();
+        setImageUploadStatus('Image ready — save the piece to persist.');
+        showStatus('Image uploaded.');
+      } catch (err) {
+        setImageUploadStatus('');
+        alert(err.message || String(err));
+      }
+    });
 
     $('#btn-export').addEventListener('click', () => {
       const data = JSON.stringify(HughGallery.load(), null, 2);

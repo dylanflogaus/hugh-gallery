@@ -119,6 +119,9 @@
       box-shadow: 0 2px 24px rgba(58,46,46,0.06);
       overflow: hidden;
     }
+    #field-panel.panel {
+      overflow: visible;
+    }
     .panel-head {
       padding: 1rem 1.25rem;
       border-bottom: 1px solid rgba(58,46,46,0.08);
@@ -223,6 +226,67 @@
       color: var(--warm-grey);
       margin-bottom: 0.35rem;
     }
+    .field-label-row {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 0.35rem;
+    }
+    .field-label-row label {
+      margin-bottom: 0;
+      flex: 1;
+      min-width: 0;
+    }
+    .field-info {
+      position: relative;
+      flex-shrink: 0;
+      width: 1.05rem;
+      height: 1.05rem;
+      padding: 0;
+      border: 1px solid rgba(58, 46, 46, 0.22);
+      border-radius: 50%;
+      background: rgba(58, 46, 46, 0.04);
+      color: var(--warm-grey);
+      font-size: 0.62rem;
+      font-weight: 700;
+      font-family: var(--font-body);
+      line-height: 1;
+      cursor: help;
+      vertical-align: middle;
+    }
+    .field-info:hover,
+    .field-info:focus-visible {
+      border-color: var(--rose);
+      color: var(--ink);
+      background: var(--blush);
+      outline: none;
+    }
+    .field-info-tooltip {
+      position: fixed;
+      z-index: 250;
+      width: max-content;
+      max-width: min(260px, calc(100vw - 24px));
+      padding: 0.5rem 0.65rem;
+      background: var(--ink);
+      color: var(--cream);
+      font-size: 0.72rem;
+      font-weight: 400;
+      line-height: 1.4;
+      text-align: left;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(58, 46, 46, 0.18);
+      pointer-events: none;
+      box-sizing: border-box;
+      white-space: normal;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.12s ease, visibility 0.12s ease;
+    }
+    .field-info-tooltip.is-visible {
+      opacity: 1;
+      visibility: visible;
+    }
+    .field-grid label.sub-label { margin-top: 0.65rem; }
     .field-grid input,
     .field-grid select,
     .field-grid textarea {
@@ -235,18 +299,68 @@
     }
     .field-grid textarea { min-height: 72px; resize: vertical; }
     .field-grid .full { grid-column: 1 / -1; }
+    .field-hint {
+      font-size: 0.82rem;
+      margin: 0.25rem 0 0;
+      line-height: 1.4;
+    }
+    .image-upload-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+    .image-upload-status {
+      font-size: 0.8rem;
+      min-height: 1.25em;
+      margin-top: 0.35rem;
+    }
+    .image-preview-wrap {
+      margin-top: 0.65rem;
+    }
+    .image-preview-thumb {
+      max-width: 100%;
+      max-height: 160px;
+      width: auto;
+      height: auto;
+      border-radius: 10px;
+      object-fit: contain;
+      border: 1px solid rgba(58,46,46,0.1);
+      display: block;
+    }
+    .sr-only-file {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
     .checks {
       display: flex;
       flex-wrap: wrap;
       gap: 1rem;
-      align-items: center;
+      align-items: flex-start;
       margin-top: 0.5rem;
     }
-    .checks label {
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex: 1 1 200px;
+    }
+    .check-row .check-label {
       display: flex;
       align-items: center;
       gap: 0.4rem;
+      flex: 1;
+      min-width: 0;
+      margin-bottom: 0;
       font-size: 0.85rem;
+      font-weight: 500;
       text-transform: none;
       letter-spacing: 0;
       color: var(--ink);
@@ -361,51 +475,87 @@
               <input type="hidden" id="form-editing-id" value="" />
               <div class="field-grid">
                 <div>
-                  <label for="field-id">URL slug (unique)</label>
+                  <div class="field-label-row">
+                    <label for="field-id">URL slug (unique)</label>
+                    <button type="button" class="field-info" aria-label="Unique id used in URLs and storage. Use lowercase words separated by hyphens (e.g. garden-reverie). Changing it later can break old links." data-tooltip="Unique id used in URLs and storage. Use lowercase words separated by hyphens (e.g. garden-reverie). Changing it later can break old links.">i</button>
+                  </div>
                   <input id="field-id" placeholder="e.g. garden-reverie" />
                 </div>
                 <div>
-                  <label for="field-title">Title</label>
+                  <div class="field-label-row">
+                    <label for="field-title">Title</label>
+                    <button type="button" class="field-info" aria-label="Main name shown on gallery cards, quick view, and anywhere the piece is listed." data-tooltip="Main name shown on gallery cards, quick view, and anywhere the piece is listed.">i</button>
+                  </div>
                   <input id="field-title" required placeholder="Piece title" />
                 </div>
                 <div class="full">
-                  <label for="field-meta">Subtitle / materials (card line)</label>
+                  <div class="field-label-row">
+                    <label for="field-meta">Subtitle / materials (card line)</label>
+                    <button type="button" class="field-info" aria-label="Secondary line under the title on cards: medium, dimensions, year, framing—keep it short." data-tooltip="Secondary line under the title on cards: medium, dimensions, year, framing—keep it short.">i</button>
+                  </div>
                   <input id="field-meta" placeholder="Watercolour · 40×50 cm · 2025" />
                 </div>
                 <div class="full">
-                  <label for="field-desc">Short description (gallery card)</label>
+                  <div class="field-label-row">
+                    <label for="field-desc">Short description (gallery card)</label>
+                    <button type="button" class="field-info" aria-label="One or two sentences on the gallery card. This is the default text for quick view if you leave the long description empty." data-tooltip="One or two sentences on the gallery card. This is the default text for quick view if you leave the long description empty.">i</button>
+                  </div>
                   <textarea id="field-desc" placeholder="One or two sentences."></textarea>
                 </div>
                 <div class="full">
-                  <label for="field-detail">Long description (quick view modal)</label>
+                  <div class="field-label-row">
+                    <label for="field-detail">Long description (quick view modal)</label>
+                    <button type="button" class="field-info" aria-label="Optional fuller story or details in the quick-view modal. If blank, the short description is shown instead." data-tooltip="Optional fuller story or details in the quick-view modal. If blank, the short description is shown instead.">i</button>
+                  </div>
                   <textarea id="field-detail" placeholder="Optional; defaults to short description."></textarea>
                 </div>
                 <div>
-                  <label for="field-label">Modal label</label>
+                  <div class="field-label-row">
+                    <label for="field-label">Modal label</label>
+                    <button type="button" class="field-info" aria-label="Small caption in the modal (e.g. Original · 2025). Distinct from the subtitle on the card." data-tooltip="Small caption in the modal (e.g. Original · 2025). Distinct from the subtitle on the card.">i</button>
+                  </div>
                   <input id="field-label" placeholder="Original · 2025" />
                 </div>
                 <div>
-                  <label for="field-price">Price (USD)</label>
+                  <div class="field-label-row">
+                    <label for="field-price">Price (USD)</label>
+                    <button type="button" class="field-info" aria-label="Whole-dollar price in US dollars, used on the site and in the cart." data-tooltip="Whole-dollar price in US dollars, used on the site and in the cart.">i</button>
+                  </div>
                   <input id="field-price" type="number" min="0" step="1" required />
                 </div>
                 <div class="full">
-                  <label for="field-cart-title">Cart product name</label>
+                  <div class="field-label-row">
+                    <label for="field-cart-title">Cart product name</label>
+                    <button type="button" class="field-info" aria-label="Line item name in the cart. Leave blank to use the title; set it when shoppers need a different label (e.g. adding Print)." data-tooltip="Line item name in the cart. Leave blank to use the title; set it when shoppers need a different label (e.g. adding Print).">i</button>
+                  </div>
                   <input id="field-cart-title" placeholder="Defaults to title; use for &quot;(Print)&quot; etc." />
                 </div>
                 <div class="full">
-                  <label for="field-gradient">Placeholder CSS background</label>
+                  <div class="field-label-row">
+                    <label for="field-gradient">Placeholder CSS background</label>
+                    <button type="button" class="field-info" aria-label="CSS for the colored placeholder when there is no image yet or while loading. Any valid background value works (solid color or gradient)." data-tooltip="CSS for the colored placeholder when there is no image yet or while loading. Any valid background value works (solid color or gradient).">i</button>
+                  </div>
                   <textarea id="field-gradient" rows="2" placeholder="linear-gradient(145deg, #f7c5c0, #d5c9e8)"></textarea>
                 </div>
                 <div>
-                  <label for="field-cart-color">Cart swatch (hex)</label>
+                  <div class="field-label-row">
+                    <label for="field-cart-color">Cart swatch (hex)</label>
+                    <button type="button" class="field-info" aria-label="Hex color for the small swatch next to this piece in the cart so buyers can tell items apart." data-tooltip="Hex color for the small swatch next to this piece in the cart so buyers can tell items apart.">i</button>
+                  </div>
                   <input id="field-cart-color" type="text" placeholder="#d5c9e8" />
                 </div>
                 <div>
-                  <label for="field-tags">Filter tags (space-separated)</label>
+                  <div class="field-label-row">
+                    <label for="field-tags">Filter tags (space-separated)</label>
+                    <button type="button" class="field-info" aria-label="Keywords for gallery filters. Separate with spaces (e.g. original watercolour floral). Use consistent spelling across pieces." data-tooltip="Keywords for gallery filters. Separate with spaces (e.g. original watercolour floral). Use consistent spelling across pieces.">i</button>
+                  </div>
                   <input id="field-tags" placeholder="original watercolour floral" />
                 </div>
-                <div>
-                  <label for="field-badge">Badge</label>
+                <div class="full">
+                  <div class="field-label-row">
+                    <label for="field-badge">Badge</label>
+                    <button type="button" class="field-info" aria-label="Preset corner label on the card (New, Print, 1 Left, Sold). Choose None if you only use a custom badge below." data-tooltip="Preset corner label on the card (New, Print, 1 Left, Sold). Choose None if you only use a custom badge below.">i</button>
+                  </div>
                   <select id="field-badge">
                     <option value="">None</option>
                     <option value="new">New</option>
@@ -413,16 +563,68 @@
                     <option value="last">1 Left</option>
                     <option value="sold">Sold</option>
                   </select>
+                  <div class="field-label-row">
+                    <label for="field-badge-custom" class="sub-label">Custom badge (optional)</label>
+                    <button type="button" class="field-info" aria-label="If filled, this text replaces the preset badge entirely (e.g. Limited edition)." data-tooltip="If filled, this text replaces the preset badge entirely (e.g. Limited edition).">i</button>
+                  </div>
+                  <input id="field-badge-custom" type="text" maxlength="80" placeholder="Overrides preset when set, e.g. Limited edition" />
                 </div>
                 <div class="full">
-                  <label for="field-image-url">Image URL (optional)</label>
-                  <input id="field-image-url" type="url" placeholder="https://…" />
+                  <div class="field-label-row">
+                    <label for="field-image-file">Artwork image (optional)</label>
+                    <button type="button" class="field-info" aria-label="Upload from your device: the image is resized (max 1800px long edge), encoded as WebP when supported (otherwise JPEG), and hosted for this site." data-tooltip="Upload from your device: the image is resized (max 1800px long edge), encoded as WebP when supported (otherwise JPEG), and hosted for this site.">i</button>
+                  </div>
+                  <p class="field-hint muted">
+                    Choose a file from your device. It is resized (max 1800px long edge), saved as WebP when your browser supports it (otherwise JPEG), then stored for this site.
+                  </p>
+                  <div class="image-upload-actions">
+                    <input
+                      class="sr-only-file"
+                      type="file"
+                      id="field-image-file"
+                      accept="image/*"
+                      tabindex="-1"
+                      aria-label="Choose artwork image file"
+                    />
+                    <button type="button" class="btn-sm" id="btn-pick-image">
+                      Choose image…
+                    </button>
+                    <button type="button" class="btn-sm danger" id="btn-clear-image">
+                      Remove image
+                    </button>
+                  </div>
+                  <div id="image-upload-status" class="image-upload-status muted" aria-live="polite"></div>
+                  <div class="image-preview-wrap" id="image-preview-wrap" hidden>
+                    <img id="image-preview" alt="" class="image-preview-thumb" />
+                  </div>
+                  <div class="field-label-row">
+                    <label for="field-image-url">Image URL (after upload)</label>
+                    <button type="button" class="field-info" aria-label="Read-only path or URL set after upload. Clear with Remove image, or leave empty to show only the gradient placeholder." data-tooltip="Read-only path or URL set after upload. Clear with Remove image, or leave empty to show only the gradient placeholder.">i</button>
+                  </div>
+                  <input
+                    id="field-image-url"
+                    type="text"
+                    readonly
+                    placeholder="Upload an image or leave empty for gradient placeholder"
+                  />
                 </div>
                 <div class="checks full">
-                  <label><input type="checkbox" id="field-large" /> Large wide card</label>
-                  <label><input type="checkbox" id="field-featured" /> Featured on home (max 3 shown)</label>
-                  <label><input type="checkbox" id="field-sold" /> Sold (no cart / quick view)</label>
-                  <label><input type="checkbox" id="field-image-dimmed" /> Dim image / placeholder</label>
+                  <div class="check-row">
+                    <label class="check-label"><input type="checkbox" id="field-large" /> Large wide card</label>
+                    <button type="button" class="field-info" aria-label="This piece spans two columns in the gallery grid for a wider hero-style card." data-tooltip="This piece spans two columns in the gallery grid for a wider hero-style card.">i</button>
+                  </div>
+                  <div class="check-row">
+                    <label class="check-label"><input type="checkbox" id="field-featured" /> Featured on home (max 3 shown)</label>
+                    <button type="button" class="field-info" aria-label="Show on the homepage featured section. Only up to three featured pieces appear at once." data-tooltip="Show on the homepage featured section. Only up to three featured pieces appear at once.">i</button>
+                  </div>
+                  <div class="check-row">
+                    <label class="check-label"><input type="checkbox" id="field-sold" /> Sold (no cart / quick view)</label>
+                    <button type="button" class="field-info" aria-label="Marks the work as sold: hides add-to-cart and quick-view purchase flow for this piece." data-tooltip="Marks the work as sold: hides add-to-cart and quick-view purchase flow for this piece.">i</button>
+                  </div>
+                  <div class="check-row">
+                    <label class="check-label"><input type="checkbox" id="field-image-dimmed" /> Dim image / placeholder</label>
+                    <button type="button" class="field-info" aria-label="Visually mutes the image or placeholder (e.g. for sold or archival pieces you want to de-emphasize)." data-tooltip="Visually mutes the image or placeholder (e.g. for sold or archival pieces you want to de-emphasize).">i</button>
+                  </div>
                 </div>
               </div>
               <div class="form-actions">

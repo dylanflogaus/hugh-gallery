@@ -12,6 +12,13 @@
 #   4) Deploy (copies HTML/CSS/JS/icons into public/, then uploads Worker + assets):
 #        npm run deploy
 #   5) Local: cp .dev.vars.example .dev.vars && npx wrangler d1 migrations apply hugh-gallery --local && npm run dev
+#      Dev server: http://localhost:8787 — if pages return HTTP 500 but /api/gallery works, stop all
+#      `wrangler dev` / workerd processes and run `npm run dev` again (stale asset binding).
+#
+#   Admin image uploads use Workers KV (binding MEDIA_KV). If you need a new namespace:
+#        npx wrangler kv namespace create hugh-gallery-media
+#        npx wrangler kv namespace create hugh-gallery-media --preview
+#   Paste the returned id / preview_id into [[kv_namespaces]] below, then npm run deploy.
 #
 name = "hugh-gallery"
 main = "src/worker.js"
@@ -20,6 +27,11 @@ compatibility_date = "2024-11-01"
 [assets]
 directory = "public"
 binding = "ASSETS"
+
+[[kv_namespaces]]
+binding = "MEDIA_KV"
+id = "125c443d82c34b5bb322b4c972632aaf"
+preview_id = "9670d6a976774673a1f9a807f4a44ca8"
 
 [[d1_databases]]
 binding = "DB"

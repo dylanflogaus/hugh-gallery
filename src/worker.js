@@ -165,6 +165,125 @@ async function handleAdminVerify(request, env) {
   return Response.json({ ok: true });
 }
 
+const UPLOAD_MAX_BYTES = 8 * 1024 * 1024;
+const SAFE_MEDIA_KEY =
+  /^uploads\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(webp|jpg|jpeg)$/i;
+
+function safeMediaKeyFromPath(pathname) {
+  const prefix = '/api/media/';
+  if (!pathname.startsWith(prefix)) return null;
+  const key = pathname.slice(prefix.length);
+  return SAFE_MEDIA_KEY.test(key) ? key : null;
+}
+
+async function handleAdminUploadImage(request, env) {
+  if (!adminOk(request, env)) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+  if (!env.MEDIA_KV) {
+    return Response.json(
+      {
+        error:
+          'Image uploads require a KV namespace (binding MEDIA_KV). See wrangler.toml.',
+      },
+      { status: 503 }
+    );
+  }
+  if (request.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+
+  let form;
+  try {
+    form = await request.formData();
+  } catch {
+    return Response.json({ error: 'Invalid multipart body' }, { status: 400 });
+  }
+
+  const file = form.get('file');
+  if (!file || typeof file.arrayBuffer !== 'function') {
+    return Response.json({ error: 'Expected form field "file"' }, { status: 400 });
+  }
+
+  const buf = await file.arrayBuffer();
+  if (buf.byteLength === 0) {
+    return Response.json({ error: 'Empty file' }, { status: 400 });
+  }
+  if (buf.byteLength > UPLOAD_MAX_BYTES) {
+    return Response.json({ error: 'File too large (max 8 MB)' }, { status: 413 });
+  }
+
+  const ct = String(file.type || '').toLowerCase();
+  let ext = 'webp';
+  let contentType = 'image/webp';
+  if (ct.includes('jpeg') || ct === 'image/jpg') {
+    ext = 'jpg';
+    contentType = 'image/jpeg';
+  } else if (!ct.includes('webp')) {
+    return Response.json(
+      { error: 'Unsupported type; use WebP or JPEG' },
+      { status: 400 }
+    );
+  }
+
+  const id = crypto.randomUUID();
+  const key = `uploads/${id}.${ext}`;
+
+  try {
+    await env.MEDIA_KV.put(key, buf, {
+      metadata: { contentType },
+    });
+  } catch (e) {
+    console.error('KV put', e);
+    return Response.json(
+      { error: 'Could not store image', detail: String(e.message || e) },
+      { status: 500 }
+    );
+  }
+
+  return Response.json({ url: `/api/media/${key}` });
+}
+
+async function handleMediaGet(request, env) {
+  if (request.method !== 'GET') {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+  if (!env.MEDIA_KV) {
+    return new Response('Not Found', { status: 404 });
+  }
+
+  const url = new URL(request.url);
+  const key = safeMediaKeyFromPath(url.pathname);
+  if (!key) {
+    return new Response('Not Found', { status: 404 });
+  }
+
+  let body;
+  let meta;
+  try {
+    const entry = await env.MEDIA_KV.getWithMetadata(key, {
+      type: 'arrayBuffer',
+    });
+    body = entry.value;
+    meta = entry.metadata;
+  } catch (e) {
+    console.error('KV get', e);
+    return new Response('Not Found', { status: 404 });
+  }
+
+  if (!body) {
+    return new Response('Not Found', { status: 404 });
+  }
+
+  const headers = new Headers();
+  const contentType =
+    (meta && typeof meta.contentType === 'string' && meta.contentType) ||
+    'application/octet-stream';
+  headers.set('Content-Type', contentType);
+  headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+  return new Response(body, { headers });
+}
+
 /** Stripe application/x-www-form-urlencoded body (nested objects + arrays). */
 function objectToStripeForm(root) {
   const sp = new URLSearchParams();
@@ -374,8 +493,26 @@ export default {
       return new Response('Method Not Allowed', { status: 405 });
     }
 
+    if (path === '/api/admin/upload-image') {
+      if (request.method === 'POST') {
+        return handleAdminUploadImage(request, env);
+      }
+      return new Response('Method Not Allowed', { status: 405 });
+    }
+
+    if (path.startsWith('/api/media/')) {
+      return handleMediaGet(request, env);
+    }
+
     if (path === '/api/checkout-session') {
       if (request.method === 'POST') return handleCheckoutSession(request, env);
+      return new Response('Method Not Allowed', { status: 405 });
+    }
+
+    if (path === '/admin' || path === '/gallery/admin') {
+      if (request.method === 'GET' || request.method === 'HEAD') {
+        return Response.redirect(new URL('/admin.html', url).toString(), 302);
+      }
       return new Response('Method Not Allowed', { status: 405 });
     }
 
