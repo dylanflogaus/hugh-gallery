@@ -304,12 +304,27 @@
       margin: 0.25rem 0 0;
       line-height: 1.4;
     }
+    .image-upload-dropzone {
+      position: relative;
+      margin-top: 0.5rem;
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      border: 1.5px dashed rgba(58,46,46,0.22);
+      background: rgba(255, 252, 248, 0.65);
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+    }
+    .image-upload-dropzone.drag-over {
+      border-color: var(--ink);
+      border-style: solid;
+      background: var(--blush);
+      box-shadow: 0 0 0 2px rgba(58,46,46,0.06);
+    }
     .image-upload-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
       align-items: center;
-      margin-top: 0.5rem;
+      margin-top: 0;
     }
     .image-upload-status {
       font-size: 0.8rem;
@@ -575,27 +590,33 @@
                     <button type="button" class="field-info" aria-label="Upload from your device: the image is resized (max 1800px long edge), encoded as WebP when supported (otherwise JPEG), and hosted for this site." data-tooltip="Upload from your device: the image is resized (max 1800px long edge), encoded as WebP when supported (otherwise JPEG), and hosted for this site.">i</button>
                   </div>
                   <p class="field-hint muted">
-                    Choose a file from your device. It is resized (max 1800px long edge), saved as WebP when your browser supports it (otherwise JPEG), then stored for this site.
+                    Choose a file or drag an image into the box below. It is resized (max 1800px long edge), saved as WebP when your browser supports it (otherwise JPEG), then stored for this site.
                   </p>
-                  <div class="image-upload-actions">
-                    <input
-                      class="sr-only-file"
-                      type="file"
-                      id="field-image-file"
-                      accept="image/*"
-                      tabindex="-1"
-                      aria-label="Choose artwork image file"
-                    />
-                    <button type="button" class="btn-sm" id="btn-pick-image">
-                      Choose image…
-                    </button>
-                    <button type="button" class="btn-sm danger" id="btn-clear-image">
-                      Remove image
-                    </button>
-                  </div>
-                  <div id="image-upload-status" class="image-upload-status muted" aria-live="polite"></div>
-                  <div class="image-preview-wrap" id="image-preview-wrap" hidden>
-                    <img id="image-preview" alt="" class="image-preview-thumb" />
+                  <div
+                    class="image-upload-dropzone"
+                    id="image-upload-dropzone"
+                    aria-label="Drop artwork image here, or use Choose image."
+                  >
+                    <div class="image-upload-actions">
+                      <input
+                        class="sr-only-file"
+                        type="file"
+                        id="field-image-file"
+                        accept="image/*"
+                        tabindex="-1"
+                        aria-label="Choose artwork image file"
+                      />
+                      <button type="button" class="btn-sm" id="btn-pick-image">
+                        Choose image…
+                      </button>
+                      <button type="button" class="btn-sm danger" id="btn-clear-image">
+                        Remove image
+                      </button>
+                    </div>
+                    <div id="image-upload-status" class="image-upload-status muted" aria-live="polite"></div>
+                    <div class="image-preview-wrap" id="image-preview-wrap" hidden>
+                      <img id="image-preview" alt="" class="image-preview-thumb" />
+                    </div>
                   </div>
                   <div class="field-label-row">
                     <label for="field-image-url">Image URL (after upload)</label>

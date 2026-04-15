@@ -451,6 +451,27 @@
     return data.url;
   }
 
+  async function handleArtworkImageFile(file) {
+    if (!file) return;
+    if (file.type && !file.type.startsWith('image/')) {
+      alert('Please choose an image file.');
+      return;
+    }
+    setImageUploadStatus('Optimizing…');
+    try {
+      const blob = await optimizeImageForWeb(file);
+      setImageUploadStatus('Uploading…');
+      const url = await uploadOptimizedImage(blob);
+      $('#field-image-url').value = url;
+      refreshImagePreview();
+      setImageUploadStatus('Image ready — save the piece to persist.');
+      showStatus('Image uploaded.');
+    } catch (err) {
+      setImageUploadStatus('');
+      alert(err.message || String(err));
+    }
+  }
+
   async function showApp() {
     $('#login-screen').hidden = true;
     $('#admin-app').hidden = false;
@@ -525,25 +546,32 @@
       const input = e.target;
       const file = input.files && input.files[0];
       input.value = '';
-      if (!file) return;
-      if (file.type && !file.type.startsWith('image/')) {
-        alert('Please choose an image file.');
-        return;
-      }
-      setImageUploadStatus('Optimizing…');
-      try {
-        const blob = await optimizeImageForWeb(file);
-        setImageUploadStatus('Uploading…');
-        const url = await uploadOptimizedImage(blob);
-        $('#field-image-url').value = url;
-        refreshImagePreview();
-        setImageUploadStatus('Image ready — save the piece to persist.');
-        showStatus('Image uploaded.');
-      } catch (err) {
-        setImageUploadStatus('');
-        alert(err.message || String(err));
-      }
+      await handleArtworkImageFile(file);
     });
+
+    const imageDropzone = $('#image-upload-dropzone');
+    if (imageDropzone) {
+      imageDropzone.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        imageDropzone.classList.add('drag-over');
+      });
+      imageDropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+        imageDropzone.classList.add('drag-over');
+      });
+      imageDropzone.addEventListener('dragleave', (e) => {
+        if (!imageDropzone.contains(e.relatedTarget)) {
+          imageDropzone.classList.remove('drag-over');
+        }
+      });
+      imageDropzone.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        imageDropzone.classList.remove('drag-over');
+        const file = e.dataTransfer?.files?.[0];
+        await handleArtworkImageFile(file);
+      });
+    }
 
     $('#btn-export').addEventListener('click', () => {
       const data = JSON.stringify(HughGallery.load(), null, 2);
