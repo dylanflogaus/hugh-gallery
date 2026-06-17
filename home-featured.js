@@ -1,5 +1,5 @@
 /**
- * Renders the home page "Recent Pieces" cards from HughGallery (featured items, max 3).
+ * Renders the home page hero mosaic and "Recent Pieces" cards from HughGallery (featured items, max 3).
  */
 (function () {
   function escapeHtml(s) {
@@ -13,6 +13,35 @@
       return `<img src="${escapeHtml(item.imageUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;" loading="lazy" />`;
     }
     return `<div class="img-placeholder" style="background:${item.gradient};"><span>${escapeHtml(item.title)}</span></div>`;
+  }
+
+  function pickDisplayItems(all) {
+    const featured = all.filter((i) => i.featured);
+    const featuredWithImages = featured.filter((i) => !!i.imageUrl);
+    const fallbackWithImages = all.filter(
+      (i) => !!i.imageUrl && !featured.some((f) => f.id === i.id)
+    );
+    return featuredWithImages.concat(fallbackWithImages).slice(0, 3);
+  }
+
+  function mosaicTag(item) {
+    const price = HughGallery.formatMoney(item.price);
+    const kind = String(item.label || 'Original').split('·')[0].trim() || 'Original';
+    if (item.sold) return `${escapeHtml(kind)} · Sold`;
+    return `${escapeHtml(kind)} · ${price}`;
+  }
+
+  function buildMosaicCell(item, index) {
+    const loading = index === 0 ? 'eager' : 'lazy';
+    const fetchPriority = index === 0 ? ' fetchpriority="high"' : '';
+    const alt = escapeHtml(item.title) + ' artwork';
+    const img = item.imageUrl
+      ? `<img src="${escapeHtml(item.imageUrl)}" alt="${alt}" loading="${loading}"${fetchPriority} />`
+      : `<div class="img-placeholder" style="background:${item.gradient};"><span>${escapeHtml(item.title)}</span></div>`;
+    return `<div class="mosaic-cell">
+      ${img}
+      <span class="mosaic-tag">${mosaicTag(item)}</span>
+    </div>`;
   }
 
   function buildCard(item, index) {
@@ -32,17 +61,29 @@
     </div>`;
   }
 
+  function renderHeroMosaic(displayItems) {
+    const mosaic = document.getElementById('hero-mosaic');
+    if (!mosaic) return;
+    mosaic.querySelectorAll('.mosaic-cell').forEach((el) => el.remove());
+    displayItems.forEach((item, i) => {
+      mosaic.insertAdjacentHTML('beforeend', buildMosaicCell(item, i));
+    });
+  }
+
   async function init() {
-    const grid = document.querySelector('.featured-grid');
-    if (!grid || !window.HughGallery) return;
+    if (!window.HughGallery) return;
 
     const all = await HughGallery.loadAsync();
-    const featured = all.filter((i) => i.featured);
-    const featuredWithImages = featured.filter((i) => !!i.imageUrl);
-    const fallbackWithImages = all.filter((i) => !!i.imageUrl && !featured.some((f) => f.id === i.id));
-    const displayItems = featuredWithImages.concat(fallbackWithImages).slice(0, 3);
+    const displayItems = pickDisplayItems(all);
+
+    renderHeroMosaic(displayItems);
+
+    const grid = document.querySelector('.featured-grid');
+    if (!grid) return;
+
     if (!displayItems.length) {
-      grid.innerHTML = '<p class="fade-up">No featured works yet. Mark items as featured in the admin dashboard.</p>';
+      grid.innerHTML =
+        '<p class="fade-up">No featured works yet. Mark items as featured in the admin dashboard.</p>';
       return;
     }
 
