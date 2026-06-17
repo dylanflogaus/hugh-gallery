@@ -36,12 +36,66 @@
     const fetchPriority = index === 0 ? ' fetchpriority="high"' : '';
     const alt = escapeHtml(item.title) + ' artwork';
     const img = item.imageUrl
-      ? `<img src="${escapeHtml(item.imageUrl)}" alt="${alt}" loading="${loading}"${fetchPriority} />`
-      : `<div class="img-placeholder" style="background:${item.gradient};"><span>${escapeHtml(item.title)}</span></div>`;
-    return `<div class="mosaic-cell">
+      ? `<div class="mosaic-cell-media"><img src="${escapeHtml(item.imageUrl)}" alt="${alt}" loading="${loading}"${fetchPriority} data-mosaic-index="${index}" /></div>`
+      : `<div class="mosaic-cell-media"><div class="img-placeholder" style="background:${item.gradient};"><span>${escapeHtml(item.title)}</span></div></div>`;
+    return `<div class="mosaic-cell" data-mosaic-index="${index}">
       ${img}
       <span class="mosaic-tag">${mosaicTag(item)}</span>
     </div>`;
+  }
+
+  /** Bias crop based on each image's aspect ratio vs its tile. */
+  function setMosaicCrop(img, cell, index) {
+    const nw = img.naturalWidth;
+    const nh = img.naturalHeight;
+    if (!nw || !nh) return;
+
+    const cellW = cell.clientWidth;
+    const cellH = cell.clientHeight;
+    if (!cellW || !cellH) return;
+
+    const imgAspect = nw / nh;
+    const cellAspect = cellW / cellH;
+    const focalY = [32, 44, 38];
+    const focalX = [50, 50, 52];
+    let x = focalX[index] ?? 50;
+    let y = focalY[index] ?? 40;
+
+    if (imgAspect < cellAspect) {
+      y = Math.max(22, Math.min(48, y - (cellAspect - imgAspect) * 18));
+    } else if (imgAspect > cellAspect * 1.12) {
+      x = 50;
+      y = imgAspect > 1.35 ? Math.min(y, 42) : y;
+    }
+
+    img.style.objectPosition = `${x}% ${y}%`;
+  }
+
+  function tuneMosaicCrops(mosaic) {
+    const cells = mosaic.querySelectorAll('.mosaic-cell');
+    const applyAll = () => {
+      cells.forEach((cell) => {
+        const img = cell.querySelector('img');
+        if (!img) return;
+        const index = Number(cell.getAttribute('data-mosaic-index')) || 0;
+        setMosaicCrop(img, cell, index);
+      });
+    };
+
+    cells.forEach((cell) => {
+      const img = cell.querySelector('img');
+      if (!img) return;
+      const index = Number(cell.getAttribute('data-mosaic-index')) || 0;
+      const tune = () => setMosaicCrop(img, cell, index);
+      if (img.complete && img.naturalWidth) tune();
+      else img.addEventListener('load', tune, { once: true });
+    });
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => applyAll());
+      ro.observe(mosaic);
+      cells.forEach((cell) => ro.observe(cell));
+    }
   }
 
   function buildCard(item, index) {
@@ -68,6 +122,7 @@
     displayItems.forEach((item, i) => {
       mosaic.insertAdjacentHTML('beforeend', buildMosaicCell(item, i));
     });
+    tuneMosaicCrops(mosaic);
   }
 
   async function init() {
