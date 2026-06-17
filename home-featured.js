@@ -1,5 +1,5 @@
 /**
- * Renders the home page hero mosaic and "Recent Pieces" cards from HughGallery (featured items, max 3).
+ * Renders the home page hero mosaic (featured) and "Recent Pieces" cards (latest uploads).
  */
 (function () {
   function escapeHtml(s) {
@@ -15,13 +15,21 @@
     return `<div class="img-placeholder" style="background:${item.gradient};"><span>${escapeHtml(item.title)}</span></div>`;
   }
 
-  function pickDisplayItems(all) {
+  /** Featured pieces for the hero mosaic (admin "featured" flag, max 3). */
+  function pickFeaturedItems(all, limit = 3) {
     const featured = all.filter((i) => i.featured);
     const featuredWithImages = featured.filter((i) => !!i.imageUrl);
     const fallbackWithImages = all.filter(
       (i) => !!i.imageUrl && !featured.some((f) => f.id === i.id)
     );
-    return featuredWithImages.concat(fallbackWithImages).slice(0, 3);
+    return featuredWithImages.concat(fallbackWithImages).slice(0, limit);
+  }
+
+  /** Most recently added pieces (gallery list order = sort_order; new items are appended in admin). */
+  function pickRecentItems(all, limit = 3) {
+    const withImages = all.filter((i) => !!i.imageUrl);
+    if (!withImages.length) return [];
+    return withImages.slice(-limit).reverse();
   }
 
   function mosaicTag(item) {
@@ -129,20 +137,21 @@
     if (!window.HughGallery) return;
 
     const all = await HughGallery.loadAsync();
-    const displayItems = pickDisplayItems(all);
+    const mosaicItems = pickFeaturedItems(all);
+    const recentItems = pickRecentItems(all);
 
-    renderHeroMosaic(displayItems);
+    renderHeroMosaic(mosaicItems);
 
     const grid = document.querySelector('.featured-grid');
     if (!grid) return;
 
-    if (!displayItems.length) {
+    if (!recentItems.length) {
       grid.innerHTML =
-        '<p class="fade-up">No featured works yet. Mark items as featured in the admin dashboard.</p>';
+        '<p class="fade-up">No works with images yet. Add pieces in the admin dashboard.</p>';
       return;
     }
 
-    grid.innerHTML = displayItems.map((item, i) => buildCard(item, i)).join('');
+    grid.innerHTML = recentItems.map((item, i) => buildCard(item, i)).join('');
 
     grid.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-home-add]');
