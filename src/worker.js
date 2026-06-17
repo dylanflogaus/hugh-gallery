@@ -477,6 +477,68 @@ function normalizePath(pathname) {
   return pathname || '/';
 }
 
+function parseRange(rangeHeader, size) {
+  const m = /^bytes=(\d*)-(\d*)$/.exec(String(rangeHeader).trim());
+  if (!m) return null;
+  const startStr = m[1];
+  const endStr = m[2];
+  let start;
+  let end;
+  if (startStr === '' && endStr === '') return null;
+  if (startStr === '') {
+    const suffix = parseInt(endStr, 10);
+    if (isNaN(suffix) || suffix <= 0) return null;
+    start = Math.max(0, size - suffix);
+    end = size - 1;
+  } else {
+    start = parseInt(startStr, 10);
+    end = endStr === '' ? size - 1 : parseInt(endStr, 10);
+  }
+  if (isNaN(start) || isNaN(end) || start > end || start >= size) return null;
+  return { start, end: Math.min(end, size - 1) };
+}
+
+/**
+ * Serve media assets with HTTP Range support so browsers can seek.
+ * The ASSETS binding returns the full file with status 200; we slice it
+ * and reply 206 Partial Content when a Range header is present.
+ */
+async function serveMediaWithRange(request, env) {
+  const url = new URL(request.url);
+  const assetReq = new Request(url.toString(), { method: 'GET' });
+  const resp = await env.ASSETS.fetch(assetReq);
+
+  if (resp.status !== 200) return resp;
+
+  const range = request.headers.get('Range');
+  if (!range) {
+    const headers = new Headers(resp.headers);
+    headers.set('Accept-Ranges', 'bytes');
+    if (request.method === 'HEAD') {
+      return new Response(null, { status: 200, headers });
+    }
+    return new Response(resp.body, { status: 200, headers });
+  }
+
+  const buf = await resp.arrayBuffer();
+  const size = buf.byteLength;
+  const parsed = parseRange(range, size);
+
+  const headers = new Headers(resp.headers);
+  headers.set('Accept-Ranges', 'bytes');
+
+  if (!parsed) {
+    headers.set('Content-Range', `bytes */${size}`);
+    return new Response(null, { status: 416, headers });
+  }
+
+  const { start, end } = parsed;
+  const chunk = buf.slice(start, end + 1);
+  headers.set('Content-Range', `bytes ${start}-${end}/${size}`);
+  headers.set('Content-Length', String(chunk.byteLength));
+  return new Response(chunk, { status: 206, headers });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -514,6 +576,10 @@ export default {
         return Response.redirect(new URL('/admin.html', url).toString(), 302);
       }
       return new Response('Method Not Allowed', { status: 405 });
+    }
+
+    if (/\.(mp4|webm|mov|m4v)$/i.test(path)) {
+      return serveMediaWithRange(request, env);
     }
 
     return env.ASSETS.fetch(request);

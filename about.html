@@ -266,9 +266,33 @@
       display: block;
     }
 
+    /* Meet-the-artist video */
+    .about-video {
+      max-width: 960px;
+      margin: 2.5rem auto 0;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #000;
+      aspect-ratio: 16 / 9;
+      box-shadow: 0 16px 48px rgba(58,46,46,0.12);
+    }
+
+    .about-video video {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: fill;
+    }
+
     /* fade-up */
     .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
     .fade-up.visible { opacity: 1; transform: none; }
+
+    /* The Artist hero is above the fold — show immediately */
+    .about-hero .fade-up {
+      opacity: 1;
+      transform: none;
+    }
 
     @media (max-width: 900px) {
       .about-hero { grid-template-columns: 1fr; gap: 3rem; }
@@ -427,39 +451,22 @@
       </div>
       <div class="material-card fade-up" style="background: linear-gradient(135deg, var(--butter), #fffaec); transition-delay:0.2s">
         <div class="material-icon"><img src="icons/zap.svg" alt="" class="icon-img icon-img--material" width="32" height="32" /></div>
-        <div class="material-name">Pastel & Mixed</div>
-        <p class="material-desc">Unison soft pastels and inks introduced in later layers for texture and luminous accents.</p>
+        <div class="material-name">Oil on Linen</div>
+        <p class="material-desc">Oil paints worked on fine linen canvas — rich, layered colour with the depth and permanence linen is prized for.</p>
       </div>
     </div>
   </section>
 
-  <!-- STUDIO SECTION -->
+  <!-- MEET THE ARTIST VIDEO -->
   <section style="padding-top:0;">
     <div class="fade-up">
-      <span class="section-label">The Studio</span>
-      <h2>Where it happens</h2>
+      <span class="section-label">Meet the Artist</span>
+      <h2>Hugh, in his own words</h2>
     </div>
-    <div class="studio-showcase fade-up" style="transition-delay:0.1s">
-      <div class="studio-grid">
-        <div class="studio-cell">
-          <img src="/artwork/web/studio.webp" alt="Hugh's studio interior" loading="lazy" />
-        </div>
-        <div class="studio-cell">
-          <img src="/artwork/web/studio-1.webp" alt="Studio detail 1" loading="lazy" />
-        </div>
-        <div class="studio-cell">
-          <img src="/artwork/web/studio-2.webp" alt="Studio detail 2" loading="lazy" />
-        </div>
-        <div class="studio-cell">
-          <img src="/artwork/web/studio-3.webp" alt="Studio detail 3" loading="lazy" />
-        </div>
-        <div class="studio-cell">
-          <img src="/artwork/web/studio-4.webp" alt="Studio detail 4" loading="lazy" />
-        </div>
-        <div class="studio-cell">
-          <img src="/artwork/web/studio-5.webp" alt="Studio detail 5" loading="lazy" />
-        </div>
-      </div>
+    <div class="about-video fade-up" style="transition-delay:0.1s">
+      <video id="meet-the-artist-video" controls preload="metadata" playsinline poster="/artwork/web/video-poster.webp" src="/artwork/video/meet-the-artist.mp4">
+        Your browser does not support the video tag.
+      </video>
     </div>
   </section>
 
@@ -495,5 +502,17 @@
   </footer>
 
   <script src="main.js"></script>
+  <script>
+    (function () {
+      var video = document.getElementById('meet-the-artist-video');
+      if (!video) return;
+      var startAt = 9;
+      // Seek only on first play so the poster stays visible as the thumbnail
+      // (seeking earlier would force a video frame to render over the poster).
+      video.addEventListener('play', function () {
+        if (video.currentTime < startAt) video.currentTime = startAt;
+      }, { once: true });
+    })();
+  </script>
 </body>
 </html>
