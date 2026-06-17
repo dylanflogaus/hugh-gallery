@@ -181,7 +181,7 @@
     const grid = document.getElementById('gallery-grid');
     if (!grid) return;
 
-    const items = await HughGallery.loadAsync();
+    const items = (await HughGallery.loadAsync()).slice().reverse();
     grid.innerHTML = items.map((item, i) => buildCardHtml(item, i)).join('');
     const map = artworksMap(items);
     initFilter(items, map);
