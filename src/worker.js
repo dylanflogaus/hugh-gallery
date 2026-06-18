@@ -10,12 +10,13 @@ function adminOk(request, env) {
 }
 
 function normalizeTags(raw) {
-  const parts = String(raw ?? '')
-    .toLowerCase()
-    .split(/[\s,]+/)
+  const str = String(raw ?? '').trim().toLowerCase();
+  if (!str) return '';
+  const parts = (str.includes(',') ? str.split(',') : str.split(/\s+/))
+    .map((t) => t.trim())
     .filter(Boolean);
   const unique = [...new Set(parts)];
-  return unique.join(' ');
+  return unique.join(', ');
 }
 
 function normalizeItem(raw) {

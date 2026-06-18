@@ -22,17 +22,22 @@
     'bloom-3': '/artwork/web/flowers-vase.webp',
   });
 
-  function normalizeTags(raw) {
-    const parts = String(raw ?? '')
-      .toLowerCase()
-      .split(/[\s,]+/)
+  function splitTagParts(raw) {
+    const str = String(raw ?? '').trim().toLowerCase();
+    if (!str) return [];
+    const parts = (str.includes(',') ? str.split(',') : str.split(/\s+/))
+      .map((t) => t.trim())
       .filter(Boolean);
-    const unique = [...new Set(parts)];
-    return unique.join(' ');
+    return parts;
+  }
+
+  function normalizeTags(raw) {
+    const unique = [...new Set(splitTagParts(raw))];
+    return unique.join(', ');
   }
 
   function parseTags(tagsStr) {
-    return normalizeTags(tagsStr).split(/\s+/).filter(Boolean);
+    return [...new Set(splitTagParts(tagsStr))];
   }
 
   function formatFilterLabel(tag) {
