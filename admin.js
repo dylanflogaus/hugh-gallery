@@ -257,7 +257,9 @@
     const items = HughGallery.load();
     if (!items.length) {
       tbody.innerHTML =
-        '<tr><td colspan="5" class="muted">No items in the database yet. Use <strong>Reset to defaults</strong> or add a piece below.</td></tr>';
+        '<tr><td colspan="6" class="muted">No items in the database yet. Use <strong>Reset to defaults</strong> or add a piece below.</td></tr>';
+      refreshBulkTagSelect(items);
+      updateBulkControls();
       return;
     }
     tbody.innerHTML = items
@@ -268,6 +270,7 @@
           ? `<img src="${escapeAttr(item.imageUrl)}" alt="" class="thumb" />`
           : `<div class="thumb-gradient" style="background:${escapeAttr(item.gradient)}"></div>`;
         return `<tr>
+          <td><input type="checkbox" class="bulk-select-item" data-index="${index}" aria-label="Select ${escapeAttr(item.title)}" /></td>
           <td>${thumb}</td>
           <td><strong>${escapeHtml(item.title)}</strong>${feat}${bad}<br><code>${escapeHtml(item.id)}</code></td>
           <td>${escapeHtml(HughGallery.formatMoney(item.price))}</td>
@@ -281,6 +284,113 @@
         </tr>`;
       })
       .join('');
+    refreshBulkTagSelect(items);
+    updateBulkControls();
+  }
+
+  function getSelectedIndices() {
+    return [...document.querySelectorAll('.bulk-select-item:checked')].map((el) =>
+      parseInt(el.getAttribute('data-index'), 10)
+    );
+  }
+
+  function refreshBulkTagSelect(items) {
+    const sel = $('#bulk-tag-select');
+    if (!sel) return;
+    const filters = HughGallery.collectGalleryFilters(items || HughGallery.load());
+    const prev = sel.value;
+    sel.innerHTML =
+      '<option value="">Choose tag…</option>' +
+      filters
+        .map(
+          (f) =>
+            `<option value="${escapeAttr(f.key)}">${escapeHtml(f.label)}</option>`
+        )
+        .join('');
+    if (prev && filters.some((f) => f.key === prev)) sel.value = prev;
+  }
+
+  function updateBulkControls() {
+    const selected = getSelectedIndices();
+    const countEl = $('#bulk-selected-count');
+    if (countEl) {
+      countEl.textContent =
+        selected.length === 1 ? '1 selected' : `${selected.length} selected`;
+    }
+    const selectAll = $('#bulk-select-all');
+    const boxes = [...document.querySelectorAll('.bulk-select-item')];
+    if (selectAll && boxes.length) {
+      selectAll.checked = boxes.length > 0 && boxes.every((cb) => cb.checked);
+      selectAll.indeterminate =
+        selected.length > 0 && selected.length < boxes.length;
+    }
+    const btn = $('#btn-bulk-apply-tag');
+    const tag = $('#bulk-tag-select')?.value || '';
+    if (btn) btn.disabled = !selected.length || !tag;
+  }
+
+  function clearBulkSelection() {
+    const selectAll = $('#bulk-select-all');
+    if (selectAll) {
+      selectAll.checked = false;
+      selectAll.indeterminate = false;
+    }
+    document.querySelectorAll('.bulk-select-item').forEach((cb) => {
+      cb.checked = false;
+    });
+    updateBulkControls();
+  }
+
+  async function applyBulkTag() {
+    const tag = ($('#bulk-tag-select')?.value || '').trim();
+    const indices = getSelectedIndices();
+    if (!tag) {
+      alert('Choose a filter tag.');
+      return;
+    }
+    if (!indices.length) {
+      alert('Select at least one piece.');
+      return;
+    }
+    const items = HughGallery.load();
+    let changed = 0;
+    indices.forEach((i) => {
+      const item = items[i];
+      if (!item) return;
+      const nextTags = HughGallery.addTagToTags(item.tags, tag);
+      if (nextTags === HughGallery.normalizeTags(item.tags)) return;
+      item.tags = nextTags;
+      changed += 1;
+    });
+    if (!changed) {
+      showStatus('Selected pieces already have that tag.');
+      return;
+    }
+    if (await saveAll(items)) {
+      showStatus(
+        `Applied “${HughGallery.formatFilterLabel(tag)}” to ${changed} piece${changed === 1 ? '' : 's'}.`
+      );
+      clearBulkSelection();
+    }
+  }
+
+  function bindBulkTagControls() {
+    $('#bulk-select-all')?.addEventListener('change', (e) => {
+      const checked = e.target.checked;
+      document.querySelectorAll('.bulk-select-item').forEach((cb) => {
+        cb.checked = checked;
+      });
+      updateBulkControls();
+    });
+
+    $('#item-list')?.addEventListener('change', (e) => {
+      if (e.target.classList.contains('bulk-select-item')) updateBulkControls();
+    });
+
+    $('#bulk-tag-select')?.addEventListener('change', updateBulkControls);
+    $('#btn-bulk-apply-tag')?.addEventListener('click', () => {
+      void applyBulkTag();
+    });
   }
 
   function escapeHtml(s) {
@@ -623,6 +733,7 @@
     });
 
     bindList();
+    bindBulkTagControls();
 
     if (isAuthed()) void showApp();
     else showLogin();

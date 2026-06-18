@@ -208,6 +208,44 @@
     }
     .tag-sold { background: rgba(58,46,46,0.12); color: var(--ink); }
 
+    .bulk-tag-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem 1rem;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(58,46,46,0.06);
+      background: rgba(253, 248, 242, 0.6);
+    }
+    .bulk-select-all {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .bulk-select-all input,
+    .bulk-select-item {
+      width: 1rem;
+      height: 1rem;
+      margin: 0;
+      accent-color: var(--ink);
+      cursor: pointer;
+    }
+    .bulk-tag-count {
+      font-size: 0.82rem;
+      color: var(--warm-grey);
+    }
+    .bulk-tag-bar select {
+      min-width: 11rem;
+      padding: 0.45rem 0.65rem;
+      border: 1.5px solid rgba(58,46,46,0.12);
+      border-radius: 8px;
+      font: inherit;
+      background: var(--cream);
+    }
+
     #field-panel .panel-body { padding: 1.25rem; }
     .field-grid {
       display: grid;
@@ -467,10 +505,22 @@
       <div class="admin-layout">
         <div class="panel">
           <div class="panel-head">All pieces (order = gallery order)</div>
+          <div class="bulk-tag-bar" id="bulk-tag-bar">
+            <label class="bulk-select-all">
+              <input type="checkbox" id="bulk-select-all" aria-label="Select all pieces" />
+              Select all
+            </label>
+            <span class="bulk-tag-count" id="bulk-selected-count">0 selected</span>
+            <select id="bulk-tag-select" aria-label="Existing filter tag">
+              <option value="">Choose tag…</option>
+            </select>
+            <button type="button" class="btn-sm" id="btn-bulk-apply-tag" disabled>Apply tag</button>
+          </div>
           <div class="admin-table-wrap">
             <table class="admin-table">
               <thead>
                 <tr>
+                  <th scope="col" aria-label="Select"></th>
                   <th></th>
                   <th>Title / ID</th>
                   <th>Price</th>

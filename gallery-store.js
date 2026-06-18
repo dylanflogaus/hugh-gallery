@@ -73,6 +73,14 @@
     return parseTags(tagsStr).includes(String(filterKey || '').toLowerCase());
   }
 
+  function addTagToTags(tagsStr, tagToAdd) {
+    const tag = String(tagToAdd ?? '').trim().toLowerCase();
+    if (!tag) return normalizeTags(tagsStr);
+    const tags = parseTags(tagsStr);
+    if (tags.includes(tag)) return normalizeTags(tagsStr);
+    return normalizeTags([...tags, tag].join(', '));
+  }
+
   function formatMoney(n) {
     const num = Number(n);
     if (!Number.isFinite(num)) return '$0';
@@ -431,6 +439,7 @@
     collectGalleryFilters,
     formatFilterLabel,
     tagMatches,
+    addTagToTags,
     formatMoney,
     slugify,
   };
