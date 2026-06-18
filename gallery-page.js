@@ -127,6 +127,25 @@
     if (e.target.id === 'modal-overlay') closeModal();
   }
 
+  function parseTags(tagsStr) {
+    return (tagsStr || '')
+      .toLowerCase()
+      .split(/[\s,]+/)
+      .filter(Boolean)
+      .map((tag) => (tag === 'watercolor' ? 'watercolour' : tag));
+  }
+
+  function tagMatches(tagsStr, filter) {
+    if (filter === 'all') return true;
+    const normalizedFilter = filter === 'watercolor' ? 'watercolour' : filter;
+    return parseTags(tagsStr).includes(normalizedFilter);
+  }
+
+  function setCardVisible(card, show) {
+    card.style.display = show ? '' : 'none';
+    if (show) card.classList.add('visible');
+  }
+
   function initFilter(items, artworks) {
     const filterBtns = document.querySelectorAll('.filter-btn');
     const grid = document.getElementById('gallery-grid');
@@ -138,7 +157,7 @@
         const filter = btn.dataset.filter;
         grid.querySelectorAll('.shop-card').forEach((card) => {
           const tags = card.dataset.tags || '';
-          card.style.display = filter === 'all' || tags.includes(filter) ? '' : 'none';
+          setCardVisible(card, tagMatches(tags, filter));
         });
       });
     });
