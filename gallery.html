@@ -291,8 +291,22 @@
     }
 
     .modal-img {
-      aspect-ratio: 1;
-      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(58, 46, 46, 0.05);
+      min-height: 280px;
+      max-height: min(75vh, 560px);
+      padding: 0.75rem;
+    }
+
+    .modal-img img {
+      max-width: 100%;
+      max-height: min(75vh, 560px);
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
     }
 
     .modal-img .img-placeholder {
@@ -366,7 +380,8 @@
     @media (max-width: 580px) {
       .gallery-grid { grid-template-columns: 1fr; gap: 1.25rem; }
       .modal { grid-template-columns: 1fr; }
-      .modal-img { aspect-ratio: 4/3; }
+      .modal-img { max-height: min(50vh, 420px); }
+      .modal-img img { max-height: min(50vh, 420px); }
     }
   </style>
 </head>

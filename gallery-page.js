@@ -101,7 +101,7 @@
     document.getElementById('modal-price').textContent = art.price;
     const inner = HughGallery.load().find((i) => i.id === id);
     const imgHtml = inner && inner.imageUrl
-      ? `<img src="${escapeHtml(inner.imageUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;" />`
+      ? `<img src="${escapeHtml(inner.imageUrl)}" alt="${escapeHtml(art.title)}" />`
       : `<div class="img-placeholder" style="background:${art.bg};height:100%;aspect-ratio:unset;"><span>${escapeHtml(art.title)}</span></div>`;
     document.getElementById('modal-img').innerHTML = imgHtml;
     const addBtn = document.getElementById('modal-add-btn');
