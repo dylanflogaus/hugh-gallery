@@ -22,13 +22,19 @@
     'bloom-3': '/artwork/web/flowers-vase.webp',
   });
 
+  const LEGACY_TAG_WORD = /^(?:original|print|prints|watercolour|watercolor|abstract|floral|oil|landscape|mixed|media)$/;
+
   function splitTagParts(raw) {
     const str = String(raw ?? '').trim().toLowerCase();
     if (!str) return [];
-    const parts = (str.includes(',') ? str.split(',') : str.split(/\s+/))
-      .map((t) => t.trim())
-      .filter(Boolean);
-    return parts;
+    if (str.includes(',')) {
+      return str.split(',').map((t) => t.trim()).filter(Boolean);
+    }
+    const words = str.split(/\s+/).filter(Boolean);
+    if (words.length > 1 && words.every((w) => LEGACY_TAG_WORD.test(w))) {
+      return words;
+    }
+    return [str];
   }
 
   function normalizeTags(raw) {
@@ -90,7 +96,7 @@
         price: 1850,
         cartTitle: 'Garden Reverie',
         gradient: 'linear-gradient(135deg, #f7c5c0 0%, #d5c9e8 35%, #bfd9f0 70%, #c5e4d8 100%)',
-        tags: 'original watercolour floral',
+        tags: 'original, watercolour, floral',
         badge: 'new',
         large: true,
         featured: false,
@@ -108,7 +114,7 @@
         price: 980,
         cartTitle: 'Drift',
         gradient: 'linear-gradient(160deg, #bfd9f0 0%, #c4a8d8 60%, #f7c5c0 100%)',
-        tags: 'original abstract',
+        tags: 'original, abstract',
         badge: '',
         large: false,
         featured: false,
@@ -126,7 +132,7 @@
         price: 290,
         cartTitle: 'Peach Blossom (Print)',
         gradient: 'linear-gradient(135deg, #f2c9a0 0%, #f7c5c0 50%, #e8a8b0 100%)',
-        tags: 'print floral',
+        tags: 'print, floral',
         badge: 'print',
         large: false,
         featured: false,
@@ -144,7 +150,7 @@
         price: 780,
         cartTitle: 'Morning Mist',
         gradient: 'linear-gradient(160deg, #c5e4d8 0%, #bfd9f0 50%, #f5eac0 100%)',
-        tags: 'original watercolour',
+        tags: 'original, watercolour',
         badge: 'last',
         large: false,
         featured: false,
@@ -162,7 +168,7 @@
         price: 1200,
         cartTitle: 'Reverie No. 4',
         gradient: 'linear-gradient(125deg, #c4a8d8 0%, #f7c5c0 50%, #f5eac0 100%)',
-        tags: 'original abstract',
+        tags: 'original, abstract',
         badge: '',
         large: false,
         featured: false,
@@ -180,7 +186,7 @@
         price: 1050,
         cartTitle: 'Wild Meadow',
         gradient: 'linear-gradient(140deg, #a8c5b0 0%, #c5e4d8 40%, #bfd9f0 100%)',
-        tags: 'original floral watercolour',
+        tags: 'original, floral, watercolour',
         badge: 'sold',
         large: false,
         featured: false,
@@ -199,7 +205,7 @@
         price: 195,
         cartTitle: 'Warm Study (Print)',
         gradient: 'linear-gradient(170deg, #f5eac0 0%, #f2c9a0 40%, #e8a8b0 100%)',
-        tags: 'print abstract',
+        tags: 'print, abstract',
         badge: 'print',
         large: false,
         featured: false,
@@ -217,7 +223,7 @@
         price: 2400,
         cartTitle: 'Spectrum',
         gradient: 'linear-gradient(115deg, #d5c9e8 0%, #bfd9f0 25%, #c5e4d8 50%, #f7c5c0 75%, #f5eac0 100%)',
-        tags: 'original abstract watercolour',
+        tags: 'original, abstract, watercolour',
         badge: 'new',
         large: true,
         featured: false,
@@ -235,7 +241,7 @@
         price: 620,
         cartTitle: 'Rose Study I',
         gradient: 'linear-gradient(150deg, #e8a8b0 0%, #f7c5c0 40%, #c4a8d8 100%)',
-        tags: 'original floral',
+        tags: 'original, floral',
         badge: '',
         large: false,
         featured: false,
@@ -253,7 +259,7 @@
         price: 1100,
         cartTitle: 'Lavender Haze',
         gradient: 'linear-gradient(145deg, #f7c5c0, #d5c9e8, #bfd9f0)',
-        tags: 'original watercolour abstract',
+        tags: 'original, watercolour, abstract',
         badge: '',
         large: false,
         featured: true,
@@ -271,7 +277,7 @@
         price: 860,
         cartTitle: 'First Light',
         gradient: 'linear-gradient(145deg, #c5e4d8, #bfd9f0, #f5eac0)',
-        tags: 'original abstract',
+        tags: 'original, abstract',
         badge: '',
         large: false,
         featured: true,
@@ -289,7 +295,7 @@
         price: 1450,
         cartTitle: 'Bloom Study III',
         gradient: 'linear-gradient(145deg, #f2c9a0, #f7c5c0, #c4a8d8)',
-        tags: 'original floral abstract',
+        tags: 'original, floral, abstract',
         badge: '',
         large: false,
         featured: true,

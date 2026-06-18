@@ -12,9 +12,9 @@ function adminOk(request, env) {
 function normalizeTags(raw) {
   const str = String(raw ?? '').trim().toLowerCase();
   if (!str) return '';
-  const parts = (str.includes(',') ? str.split(',') : str.split(/\s+/))
-    .map((t) => t.trim())
-    .filter(Boolean);
+  const parts = str.includes(',')
+    ? str.split(',').map((t) => t.trim()).filter(Boolean)
+    : [str];
   const unique = [...new Set(parts)];
   return unique.join(', ');
 }
@@ -81,7 +81,7 @@ async function handleGalleryGet(env) {
     const items = (results || []).map(rowToItem);
     return Response.json(items, {
       headers: {
-        'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+        'Cache-Control': 'private, no-cache, must-revalidate',
       },
     });
   } catch (e) {
