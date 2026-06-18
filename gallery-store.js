@@ -7,28 +7,6 @@
   const API_GALLERY = '/api/gallery';
   const API_TIMEOUT_MS = 2500;
 
-  /** Canonical gallery filter buttons (shared with admin). */
-  const GALLERY_FILTERS = Object.freeze([
-    { key: 'original', label: 'Originals' },
-    { key: 'print', label: 'Prints' },
-    { key: 'watercolour', label: 'Watercolour' },
-    { key: 'abstract', label: 'Abstract' },
-    { key: 'floral', label: 'Floral' },
-  ]);
-
-  const TAG_ALIASES = Object.freeze({
-    original: 'original',
-    originals: 'original',
-    print: 'print',
-    prints: 'print',
-    watercolour: 'watercolour',
-    watercolor: 'watercolour',
-    abstract: 'abstract',
-    abstracts: 'abstract',
-    floral: 'floral',
-    florals: 'floral',
-  });
-
   const FALLBACK_IMAGE_BY_ID = Object.freeze({
     'garden-reverie': '/artwork/web/flowers.webp',
     drift: '/artwork/web/sea.webp',
@@ -44,28 +22,44 @@
     'bloom-3': '/artwork/web/flowers-vase.webp',
   });
 
-  function canonicalTag(tag) {
-    const key = String(tag || '').trim().toLowerCase();
-    return TAG_ALIASES[key] || key;
-  }
-
   function normalizeTags(raw) {
     const parts = String(raw ?? '')
       .toLowerCase()
       .split(/[\s,]+/)
-      .filter(Boolean)
-      .map(canonicalTag);
+      .filter(Boolean);
     const unique = [...new Set(parts)];
-    return unique.length ? unique.join(' ') : 'original';
+    return unique.join(' ');
   }
 
   function parseTags(tagsStr) {
     return normalizeTags(tagsStr).split(/\s+/).filter(Boolean);
   }
 
+  function formatFilterLabel(tag) {
+    return tag
+      .split(/[\s-]+/)
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+  }
+
+  /** Unique filter buttons derived from tags saved on gallery items. */
+  function collectGalleryFilters(items) {
+    const seen = new Set();
+    const filters = [];
+    (items || []).forEach((item) => {
+      parseTags(item.tags).forEach((tag) => {
+        if (seen.has(tag)) return;
+        seen.add(tag);
+        filters.push({ key: tag, label: formatFilterLabel(tag) });
+      });
+    });
+    return filters;
+  }
+
   function tagMatches(tagsStr, filterKey) {
     if (filterKey === 'all') return true;
-    return parseTags(tagsStr).includes(canonicalTag(filterKey));
+    return parseTags(tagsStr).includes(String(filterKey || '').toLowerCase());
   }
 
   function formatMoney(n) {
@@ -315,7 +309,7 @@
       price: Number(raw.price) || 0,
       cartTitle: String(raw.cartTitle ?? raw.title ?? '').trim() || 'Untitled',
       gradient: String(raw.gradient ?? 'linear-gradient(135deg, #f7c5c0, #d5c9e8)').trim(),
-      tags: normalizeTags(raw.tags ?? 'original'),
+      tags: normalizeTags(raw.tags ?? ''),
       badge: String(raw.badge ?? '').trim().toLowerCase(),
       large: !!raw.large,
       featured: !!raw.featured,
@@ -414,7 +408,6 @@
   window.HughGallery = {
     STORAGE_KEY,
     API_GALLERY,
-    GALLERY_FILTERS,
     load,
     loadAsync,
     save,
@@ -424,6 +417,8 @@
     normalizeItem,
     normalizeTags,
     parseTags,
+    collectGalleryFilters,
+    formatFilterLabel,
     tagMatches,
     formatMoney,
     slugify,

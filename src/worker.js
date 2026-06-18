@@ -10,25 +10,12 @@ function adminOk(request, env) {
 }
 
 function normalizeTags(raw) {
-  const aliases = {
-    original: 'original',
-    originals: 'original',
-    print: 'print',
-    prints: 'print',
-    watercolour: 'watercolour',
-    watercolor: 'watercolour',
-    abstract: 'abstract',
-    abstracts: 'abstract',
-    floral: 'floral',
-    florals: 'floral',
-  };
   const parts = String(raw ?? '')
     .toLowerCase()
     .split(/[\s,]+/)
-    .filter(Boolean)
-    .map((tag) => aliases[tag] || tag);
+    .filter(Boolean);
   const unique = [...new Set(parts)];
-  return unique.length ? unique.join(' ') : 'original';
+  return unique.join(' ');
 }
 
 function normalizeItem(raw) {
@@ -50,7 +37,7 @@ function normalizeItem(raw) {
     gradient: String(
       raw.gradient ?? 'linear-gradient(135deg, #f7c5c0, #d5c9e8)'
     ).trim(),
-    tags: normalizeTags(raw.tags ?? 'original'),
+    tags: normalizeTags(raw.tags ?? ''),
     badge: String(raw.badge ?? '')
       .trim()
       .toLowerCase(),

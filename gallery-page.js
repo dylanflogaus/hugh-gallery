@@ -127,11 +127,12 @@
     if (e.target.id === 'modal-overlay') closeModal();
   }
 
-  function renderFilterBar() {
+  function renderFilterBar(items) {
     const bar = document.querySelector('.filter-bar');
     if (!bar) return;
+    const tagFilters = HughGallery.collectGalleryFilters(items);
     bar.innerHTML = '<span class="filter-label">Filter:</span>';
-    const filters = [{ key: 'all', label: 'All Works' }, ...HughGallery.GALLERY_FILTERS];
+    const filters = [{ key: 'all', label: 'All Works' }, ...tagFilters];
     filters.forEach((f, i) => {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -140,6 +141,7 @@
       btn.textContent = f.label;
       bar.appendChild(btn);
     });
+    bar.style.display = tagFilters.length ? '' : 'none';
   }
 
   function applyFilter(filter, grid, items) {
@@ -209,7 +211,7 @@
     const items = (await HughGallery.loadAsync()).slice().reverse();
     grid.innerHTML = items.map((item, i) => buildCardHtml(item, i)).join('');
     const map = artworksMap(items);
-    renderFilterBar();
+    renderFilterBar(items);
     initFilter(items, map);
 
     window.openModal = (id) => openModal(id, map);

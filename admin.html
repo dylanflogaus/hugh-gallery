@@ -304,25 +304,6 @@
       margin: 0.25rem 0 0;
       line-height: 1.4;
     }
-    .filter-tag-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.65rem 1rem;
-      margin-top: 0.35rem;
-    }
-    .filter-tag-option {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      user-select: none;
-    }
-    .filter-tag-option input {
-      width: auto;
-      margin: 0;
-      accent-color: var(--ink);
-    }
     .image-upload-dropzone {
       position: relative;
       margin-top: 0.5rem;
@@ -580,11 +561,11 @@
                 </div>
                 <div class="full">
                   <div class="field-label-row">
-                    <label>Gallery filters</label>
-                    <button type="button" class="field-info" aria-label="Choose which gallery filter buttons include this piece. These must match the filters on the Gallery page." data-tooltip="Choose which gallery filter buttons include this piece. These must match the filters on the Gallery page.">i</button>
+                    <label for="field-tags">Gallery filters (space-separated)</label>
+                    <button type="button" class="field-info" aria-label="Keywords that become filter buttons on the Gallery page. Separate with spaces (e.g. original watercolour floral). Only tags used on at least one piece appear as filters." data-tooltip="Keywords that become filter buttons on the Gallery page. Separate with spaces (e.g. original watercolour floral). Only tags used on at least one piece appear as filters.">i</button>
                   </div>
-                  <div class="filter-tag-options" id="field-filter-tags"></div>
-                  <p class="field-hint muted">Select one or more filters. Pieces with no filters selected default to Originals.</p>
+                  <input id="field-tags" placeholder="original watercolour floral" />
+                  <p class="field-hint muted">Each word becomes a gallery filter button when at least one piece uses it.</p>
                 </div>
                 <div class="full">
                   <div class="field-label-row">
