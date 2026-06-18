@@ -9,6 +9,28 @@ function adminOk(request, env) {
   return token === secret;
 }
 
+function normalizeTags(raw) {
+  const aliases = {
+    original: 'original',
+    originals: 'original',
+    print: 'print',
+    prints: 'print',
+    watercolour: 'watercolour',
+    watercolor: 'watercolour',
+    abstract: 'abstract',
+    abstracts: 'abstract',
+    floral: 'floral',
+    florals: 'floral',
+  };
+  const parts = String(raw ?? '')
+    .toLowerCase()
+    .split(/[\s,]+/)
+    .filter(Boolean)
+    .map((tag) => aliases[tag] || tag);
+  const unique = [...new Set(parts)];
+  return unique.length ? unique.join(' ') : 'original';
+}
+
 function normalizeItem(raw) {
   const id =
     String(raw.id || '')
@@ -28,9 +50,7 @@ function normalizeItem(raw) {
     gradient: String(
       raw.gradient ?? 'linear-gradient(135deg, #f7c5c0, #d5c9e8)'
     ).trim(),
-    tags: String(raw.tags ?? 'original')
-      .trim()
-      .toLowerCase() || 'original',
+    tags: normalizeTags(raw.tags ?? 'original'),
     badge: String(raw.badge ?? '')
       .trim()
       .toLowerCase(),

@@ -57,7 +57,7 @@
       : `<span class="shop-price">${priceStr}</span>
          <button type="button" class="btn-add-full" data-add-cart="${escapeHtml(item.id)}">+ Add to Cart</button>`;
 
-    return `<div class="shop-card${largeClass} fade-up" data-tags="${tags}"${delay}>
+    return `<div class="shop-card${largeClass} fade-up" data-id="${escapeHtml(item.id)}" data-tags="${tags}"${delay}>
       <div class="shop-card-img">
         ${artImageHtml(item)}
         ${badgeHtml}
@@ -127,18 +127,28 @@
     if (e.target.id === 'modal-overlay') closeModal();
   }
 
-  function parseTags(tagsStr) {
-    return (tagsStr || '')
-      .toLowerCase()
-      .split(/[\s,]+/)
-      .filter(Boolean)
-      .map((tag) => (tag === 'watercolor' ? 'watercolour' : tag));
+  function renderFilterBar() {
+    const bar = document.querySelector('.filter-bar');
+    if (!bar) return;
+    bar.innerHTML = '<span class="filter-label">Filter:</span>';
+    const filters = [{ key: 'all', label: 'All Works' }, ...HughGallery.GALLERY_FILTERS];
+    filters.forEach((f, i) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'filter-btn' + (i === 0 ? ' active' : '');
+      btn.dataset.filter = f.key;
+      btn.textContent = f.label;
+      bar.appendChild(btn);
+    });
   }
 
-  function tagMatches(tagsStr, filter) {
-    if (filter === 'all') return true;
-    const normalizedFilter = filter === 'watercolor' ? 'watercolour' : filter;
-    return parseTags(tagsStr).includes(normalizedFilter);
+  function applyFilter(filter, grid, items) {
+    const byId = new Map(items.map((item) => [item.id, item]));
+    grid.querySelectorAll('.shop-card').forEach((card) => {
+      const item = byId.get(card.dataset.id);
+      const tags = item ? item.tags : card.dataset.tags || '';
+      setCardVisible(card, HughGallery.tagMatches(tags, filter));
+    });
   }
 
   function setCardVisible(card, show) {
@@ -154,11 +164,7 @@
       btn.addEventListener('click', () => {
         filterBtns.forEach((b) => b.classList.remove('active'));
         btn.classList.add('active');
-        const filter = btn.dataset.filter;
-        grid.querySelectorAll('.shop-card').forEach((card) => {
-          const tags = card.dataset.tags || '';
-          setCardVisible(card, tagMatches(tags, filter));
-        });
+        applyFilter(btn.dataset.filter, grid, items);
       });
     });
 
@@ -203,6 +209,7 @@
     const items = (await HughGallery.loadAsync()).slice().reverse();
     grid.innerHTML = items.map((item, i) => buildCardHtml(item, i)).join('');
     const map = artworksMap(items);
+    renderFilterBar();
     initFilter(items, map);
 
     window.openModal = (id) => openModal(id, map);

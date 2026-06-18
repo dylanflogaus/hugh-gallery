@@ -6,6 +6,29 @@
   const STORAGE_KEY = 'hugh_gallery_items';
   const API_GALLERY = '/api/gallery';
   const API_TIMEOUT_MS = 2500;
+
+  /** Canonical gallery filter buttons (shared with admin). */
+  const GALLERY_FILTERS = Object.freeze([
+    { key: 'original', label: 'Originals' },
+    { key: 'print', label: 'Prints' },
+    { key: 'watercolour', label: 'Watercolour' },
+    { key: 'abstract', label: 'Abstract' },
+    { key: 'floral', label: 'Floral' },
+  ]);
+
+  const TAG_ALIASES = Object.freeze({
+    original: 'original',
+    originals: 'original',
+    print: 'print',
+    prints: 'print',
+    watercolour: 'watercolour',
+    watercolor: 'watercolour',
+    abstract: 'abstract',
+    abstracts: 'abstract',
+    floral: 'floral',
+    florals: 'floral',
+  });
+
   const FALLBACK_IMAGE_BY_ID = Object.freeze({
     'garden-reverie': '/artwork/web/flowers.webp',
     drift: '/artwork/web/sea.webp',
@@ -20,6 +43,30 @@
     'first-light': '/artwork/web/scenic.webp',
     'bloom-3': '/artwork/web/flowers-vase.webp',
   });
+
+  function canonicalTag(tag) {
+    const key = String(tag || '').trim().toLowerCase();
+    return TAG_ALIASES[key] || key;
+  }
+
+  function normalizeTags(raw) {
+    const parts = String(raw ?? '')
+      .toLowerCase()
+      .split(/[\s,]+/)
+      .filter(Boolean)
+      .map(canonicalTag);
+    const unique = [...new Set(parts)];
+    return unique.length ? unique.join(' ') : 'original';
+  }
+
+  function parseTags(tagsStr) {
+    return normalizeTags(tagsStr).split(/\s+/).filter(Boolean);
+  }
+
+  function tagMatches(tagsStr, filterKey) {
+    if (filterKey === 'all') return true;
+    return parseTags(tagsStr).includes(canonicalTag(filterKey));
+  }
 
   function formatMoney(n) {
     const num = Number(n);
@@ -268,7 +315,7 @@
       price: Number(raw.price) || 0,
       cartTitle: String(raw.cartTitle ?? raw.title ?? '').trim() || 'Untitled',
       gradient: String(raw.gradient ?? 'linear-gradient(135deg, #f7c5c0, #d5c9e8)').trim(),
-      tags: String(raw.tags ?? 'original').trim().toLowerCase() || 'original',
+      tags: normalizeTags(raw.tags ?? 'original'),
       badge: String(raw.badge ?? '').trim().toLowerCase(),
       large: !!raw.large,
       featured: !!raw.featured,
@@ -367,6 +414,7 @@
   window.HughGallery = {
     STORAGE_KEY,
     API_GALLERY,
+    GALLERY_FILTERS,
     load,
     loadAsync,
     save,
@@ -374,6 +422,9 @@
     clearStorage,
     getDefaultItems,
     normalizeItem,
+    normalizeTags,
+    parseTags,
+    tagMatches,
     formatMoney,
     slugify,
   };

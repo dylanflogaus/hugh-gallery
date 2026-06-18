@@ -304,6 +304,25 @@
       margin: 0.25rem 0 0;
       line-height: 1.4;
     }
+    .filter-tag-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem 1rem;
+      margin-top: 0.35rem;
+    }
+    .filter-tag-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .filter-tag-option input {
+      width: auto;
+      margin: 0;
+      accent-color: var(--ink);
+    }
     .image-upload-dropzone {
       position: relative;
       margin-top: 0.5rem;
@@ -559,12 +578,13 @@
                   </div>
                   <input id="field-cart-color" type="text" placeholder="#d5c9e8" />
                 </div>
-                <div>
+                <div class="full">
                   <div class="field-label-row">
-                    <label for="field-tags">Filter tags (space-separated)</label>
-                    <button type="button" class="field-info" aria-label="Keywords for gallery filters. Separate with spaces (e.g. original watercolour floral). Use consistent spelling across pieces." data-tooltip="Keywords for gallery filters. Separate with spaces (e.g. original watercolour floral). Use consistent spelling across pieces.">i</button>
+                    <label>Gallery filters</label>
+                    <button type="button" class="field-info" aria-label="Choose which gallery filter buttons include this piece. These must match the filters on the Gallery page." data-tooltip="Choose which gallery filter buttons include this piece. These must match the filters on the Gallery page.">i</button>
                   </div>
-                  <input id="field-tags" placeholder="original watercolour floral" />
+                  <div class="filter-tag-options" id="field-filter-tags"></div>
+                  <p class="field-hint muted">Select one or more filters. Pieces with no filters selected default to Originals.</p>
                 </div>
                 <div class="full">
                   <div class="field-label-row">

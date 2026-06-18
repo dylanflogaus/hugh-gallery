@@ -132,6 +132,31 @@
     location.reload();
   }
 
+  function setupFilterTagOptions() {
+    const wrap = $('#field-filter-tags');
+    if (!wrap) return;
+    wrap.innerHTML = HughGallery.GALLERY_FILTERS.map(
+      (f) =>
+        `<label class="filter-tag-option"><input type="checkbox" value="${escapeAttr(f.key)}" /> ${escapeHtml(f.label)}</label>`
+    ).join('');
+  }
+
+  function readFilterTags() {
+    const wrap = $('#field-filter-tags');
+    if (!wrap) return 'original';
+    const checked = [...wrap.querySelectorAll('input:checked')].map((el) => el.value);
+    return HughGallery.normalizeTags(checked.join(' '));
+  }
+
+  function fillFilterTags(tagsStr) {
+    const wrap = $('#field-filter-tags');
+    if (!wrap) return;
+    const tagSet = new Set(HughGallery.parseTags(tagsStr));
+    wrap.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+      cb.checked = tagSet.has(cb.value);
+    });
+  }
+
   function blankFormItem() {
     return HughGallery.normalizeItem({
       id: '',
@@ -179,7 +204,7 @@
       price: $('#field-price').value,
       cartTitle: $('#field-cart-title').value || $('#field-title').value,
       gradient: $('#field-gradient').value,
-      tags: $('#field-tags').value,
+      tags: readFilterTags(),
       badge: (() => {
         const custom = $('#field-badge-custom').value.trim();
         if (custom) return custom;
@@ -206,7 +231,7 @@
     $('#field-price').value = item.price;
     $('#field-cart-title').value = item.cartTitle;
     $('#field-gradient').value = item.gradient;
-    $('#field-tags').value = item.tags;
+    fillFilterTags(item.tags);
     const b = item.badge || '';
     if (PRESET_BADGE_KEYS.has(b)) {
       $('#field-badge').value = b;
@@ -238,7 +263,7 @@
     $('#field-price').value = '';
     $('#field-cart-title').value = '';
     $('#field-gradient').value = b.gradient;
-    $('#field-tags').value = b.tags;
+    fillFilterTags(b.tags);
     $('#field-badge').value = '';
     $('#field-badge-custom').value = '';
     $('#field-large').checked = false;
@@ -490,6 +515,7 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     setupFieldInfoTips();
+    setupFilterTagOptions();
 
     $('#login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
