@@ -309,8 +309,21 @@
 
     .about-teaser-portrait .img-placeholder { height: 100%; aspect-ratio: unset; }
 
-    .about-teaser-text h2 { margin-bottom: 1rem; }
-    .about-teaser-text p { margin-bottom: 2rem; }
+    .about-teaser-text {
+      background: var(--cream);
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(58, 46, 46, 0.12);
+    }
+
+    .about-teaser-text h2 { margin-bottom: 1rem; color: var(--ink); }
+    .about-teaser-text p { margin-bottom: 2rem; color: var(--ink); }
+    .about-teaser-text .section-label {
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+    }
 
     .about-quote {
       font-family: var(--font-italic);
